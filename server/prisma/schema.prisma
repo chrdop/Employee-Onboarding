@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  hr_central
+  hr_deputy
+  location_manager
+  location_deputy
+}
+
+enum TaskStatus {
+  open
+  in_progress
+  done
+  not_required
+}
+
+enum FeedbackState {
+  open
+  overdue
+  done
+}
+
+enum ResourceType {
+  link
+  document
+}
+
+// ---------------------------------------------------------------------------
+// Locations
+// ---------------------------------------------------------------------------
+
+model Location {
+  id                 String   @id @default(cuid())
+  mandantNr          String   @unique @map("mandant_nr")
+  shortCode          String   @unique @map("short_code")
+  hotelName          String   @map("hotel_name")
+  address            String?
+  plzOrt             String?  @map("plz_ort")
+  phone              String?
+  fax                String?
+  generalEmail       String?  @map("general_email")
+  roomCount          Int?     @map("room_count")
+  billingAddressBlock String? @map("billing_address_block") @db.Text
+  legalEntity        String?  @map("legal_entity")
+  vatId              String?  @map("vat_id")
+  taxNumber          String?  @map("tax_number")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  contacts          LocationContact[]
+  interfaceContacts LocationInterfaceContact[]
+  employees         Employee[]
+  users             User[]
+
+  @@map("locations")
+}
+
+model LocationContact {
+  id         String   @id @default(cuid())
+  locationId String   @map("location_id")
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  role       String // e.g. "GM", "OM"
+  name       String
+  email      String?
+  note       String? @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("location_contacts")
+}
+
+// Open string `type` on purpose (IT/Payroll/KEOS/AMS/Facility/...) so new
+// interface types can be added without a schema migration.
+model LocationInterfaceContact {
+  id         String   @id @default(cuid())
+  locationId String   @map("location_id")
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  type       String
+  name       String?
+  email      String?
+  phone      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("location_interface_contacts")
+}
+
+// ---------------------------------------------------------------------------
+// Users & auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id                 String   @id @default(cuid())
+  name               String
+  email              String   @unique
+  passwordHash       String   @map("password_hash")
+  role               UserRole
+  locationId         String?  @map("location_id")
+  location           Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  isDeputyForUserId  String?  @map("is_deputy_for_user_id")
+  isDeputyForUser    User?    @relation("Deputy", fields: [isDeputyForUserId], references: [id], onDelete: SetNull)
+  deputies           User[]   @relation("Deputy")
+  mustChangePassword Boolean  @default(false) @map("must_change_password")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  assignedTasks    Task[]         @relation("AssignedTasks")
+  taskEvents       TaskEvent[]
+  notifications    Notification[]
+  uploadedResources TaskResource[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Employees
+// ---------------------------------------------------------------------------
+
+model Employee {
+  id                 String   @id @default(cuid())
+  locationId         String   @map("location_id")
+  location           Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  employeeNumber     String?  @map("employee_number")
+  name               String
+  position           String?
+  startDate          DateTime @map("start_date")
+  peopledocReference String?  @map("peopledoc_reference")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+
+  @@map("employees")
+}
+
+// ---------------------------------------------------------------------------
+// Task catalog (global, template-level)
+// ---------------------------------------------------------------------------
+
+model TaskTemplate {
+  id                 String   @id @default(cuid())
+  position           Int      @default(0)
+  title              String
+  descriptionWhatHow String?  @map("description_what_how") @db.Text
+  defaultDueDays     Int?     @map("default_due_days")
+  defaultReminderDays Int?    @map("default_reminder_days")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  resources TaskResource[]
+  tasks     Task[]
+
+  @@map("task_templates")
+}
+
+// MVP: template-level only. `taskId` is intentionally NOT modeled yet; an
+// optional instance-level FK can be added later as an additive migration
+// without touching this table's existing rows or the routes that use it.
+model TaskResource {
+  id             String       @id @default(cuid())
+  taskTemplateId String       @map("task_template_id")
+  taskTemplate   TaskTemplate @relation(fields: [taskTemplateId], references: [id], onDelete: Cascade)
+  type           ResourceType
+  title          String
+  urlOrFilePath  String       @map("url_or_file_path")
+  uploadedById   String?      @map("uploaded_by")
+  uploadedBy     User?        @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt     DateTime     @default(now()) @map("uploaded_at")
+
+  @@map("task_resources")
+}
+
+// ---------------------------------------------------------------------------
+// Task instances (per employee)
+// ---------------------------------------------------------------------------
+
+model Task {
+  id                  String     @id @default(cuid())
+  employeeId          String     @map("employee_id")
+  employee            Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  templateId          String     @map("template_id")
+  template            TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  // Self-reference kept from day one so subtasks (Phase 3) need no migration.
+  parentTaskId String? @map("parent_task_id")
+  parentTask   Task?   @relation("Subtasks", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  subtasks     Task[]  @relation("Subtasks")
+
+  assignedToUserId   String?    @map("assigned_to_user_id")
+  assignedToUser     User?      @relation("AssignedTasks", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  status             TaskStatus @default(open)
+  notRequiredReason  String?    @map("not_required_reason") @db.Text
+  dueDate            DateTime?  @map("due_date")
+  reminderIntervalDays Int?     @map("reminder_interval_days")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  events   TaskEvent[]
+  feedback FeedbackStatus?
+
+  @@index([employeeId])
+  @@index([templateId])
+  @@map("tasks")
+}
+
+model TaskEvent {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+  eventType String   @map("event_type")
+  text      String?  @db.Text
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([taskId])
+  @@map("task_events")
+}
+
+// Feedback status is tracked separately from task status on purpose
+// (external interface confirmation vs. internal task completion).
+model FeedbackStatus {
+  id                  String        @id @default(cuid())
+  taskId              String        @unique @map("task_id")
+  task                Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  status              FeedbackState @default(open)
+  magicLinkToken       String?       @unique @map("magic_link_token")
+  externalContactName String?       @map("external_contact_name")
+  requestedAt         DateTime?     @map("requested_at")
+  respondedAt         DateTime?     @map("responded_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  @@map("feedback_status")
+}
+
+// ---------------------------------------------------------------------------
+// Notifications (in-app center)
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String
+  title         String
+  message       String   @db.Text
+  relatedTaskId String?  @map("related_task_id")
+  isRead        Boolean  @default(false) @map("is_read")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// System settings (single global key/value store)
+// ---------------------------------------------------------------------------
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
