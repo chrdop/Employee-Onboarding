@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { MiniCalendar } from "./MiniCalendar";
 import { NotificationBell } from "./NotificationBell";
 
 export function Layout() {
@@ -23,6 +24,9 @@ export function Layout() {
         {isLocationRole && <NavLink to="/my-open-tasks">My Open Tasks</NavLink>}
         <NavLink to="/notifications">Notifications</NavLink>
         {isHr && <NavLink to="/setup">Setup</NavLink>}
+        <div style={{ marginTop: "auto", padding: "0.75rem 1.25rem 0" }}>
+          <MiniCalendar />
+        </div>
         <div className="nav-footer">
           <div>{user?.name}</div>
           <div style={{ opacity: 0.7 }}>{user?.role}</div>

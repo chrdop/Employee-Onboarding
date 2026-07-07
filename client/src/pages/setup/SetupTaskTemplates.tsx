@@ -47,7 +47,17 @@ export function SetupTaskTemplates() {
                 (due {t.defaultDueDays ?? "-"} days before entry, remind {t.defaultReminderDays ?? "-"} days before)
               </span>
             </div>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              {t.resources.some((r) => r.type === "document") && (
+                <span title="Has a document attached" aria-label="Has a document attached">
+                  📄
+                </span>
+              )}
+              {t.resources.some((r) => r.type === "link") && (
+                <span title="Has a link attached" aria-label="Has a link attached">
+                  🔗
+                </span>
+              )}
               <button
                 className="btn secondary"
                 disabled={i === 0}

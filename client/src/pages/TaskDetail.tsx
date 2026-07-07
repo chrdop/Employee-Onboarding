@@ -32,6 +32,11 @@ export function TaskDetail() {
     reload();
   }
 
+  async function updateDueDate(value: string) {
+    await api.patch(`/tasks/${id}`, { dueDate: value || null });
+    reload();
+  }
+
   return (
     <div>
       <h1>{task.template.title}</h1>
@@ -60,6 +65,15 @@ export function TaskDetail() {
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Reminder</h3>
         <div className="form-field" style={{ maxWidth: 240 }}>
+          <label htmlFor="dueDate">Due date</label>
+          <input
+            id="dueDate"
+            type="date"
+            defaultValue={task.dueDate ? task.dueDate.slice(0, 10) : ""}
+            onBlur={(e) => updateDueDate(e.target.value)}
+          />
+        </div>
+        <div className="form-field" style={{ maxWidth: 240, marginTop: "0.75rem" }}>
           <label htmlFor="reminder">Remind this many days before due date</label>
           <input
             id="reminder"
@@ -69,9 +83,6 @@ export function TaskDetail() {
             onBlur={(e) => updateReminder(e.target.value ? Number(e.target.value) : null)}
           />
         </div>
-        <p className="muted" style={{ marginTop: "0.5rem" }}>
-          Due date: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "not set"}
-        </p>
       </div>
 
       {task.template.resources.length > 0 && (
