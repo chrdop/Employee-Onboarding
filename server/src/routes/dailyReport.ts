@@ -87,10 +87,17 @@ router.get("/", async (req, res) => {
         title: t.template.title,
         employeeName: t.employee.name,
         hotelName: t.employee.location.hotelName,
+        shortCode: t.employee.location.shortCode,
         dueDate: t.dueDate,
       }))
-      // Grouped by location (alphabetical), then by due date within each location.
-      .sort((a, b) => a.hotelName.localeCompare(b.hotelName) || a.dueDate!.getTime() - b.dueDate!.getTime()),
+      // Grouped by location, then by employee within it (so an employee's
+      // tasks read as one block), then by due date.
+      .sort(
+        (a, b) =>
+          a.shortCode.localeCompare(b.shortCode) ||
+          a.employeeName.localeCompare(b.employeeName) ||
+          a.dueDate!.getTime() - b.dueDate!.getTime()
+      ),
   });
 });
 

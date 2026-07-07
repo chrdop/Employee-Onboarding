@@ -46,6 +46,38 @@ router.post("/", async (req, res) => {
   res.status(201).json(template);
 });
 
+const reorderSchema = z.object({
+  templateId: z.string().min(1),
+  direction: z.enum(["up", "down"]),
+});
+
+// Must be registered before PATCH /:id, otherwise Express would match
+// "reorder" as an :id.
+router.patch("/reorder", async (req, res) => {
+  const parsed = reorderSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+
+  const templates = await prisma.taskTemplate.findMany({
+    where: { isActive: true },
+    orderBy: { position: "asc" },
+  });
+  const index = templates.findIndex((t) => t.id === parsed.data.templateId);
+  if (index === -1) return res.status(404).json({ error: "Template not found" });
+  const swapIndex = parsed.data.direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= templates.length) {
+    return res.status(400).json({ error: "Template is already at the boundary" });
+  }
+
+  const a = templates[index];
+  const b = templates[swapIndex];
+  await prisma.$transaction([
+    prisma.taskTemplate.update({ where: { id: a.id }, data: { position: b.position } }),
+    prisma.taskTemplate.update({ where: { id: b.id }, data: { position: a.position } }),
+  ]);
+
+  res.json({ ok: true });
+});
+
 router.patch("/:id", async (req, res) => {
   const parsed = templateSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.message });

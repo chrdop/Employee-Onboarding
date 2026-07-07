@@ -219,20 +219,20 @@ function ContactsManager({ location, onChanged }: { location: Location; onChange
 function InterfaceContactsManager({ location, onChanged }: { location: Location; onChanged: () => void }) {
   const [type, setType] = useState("IT");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
 
   async function add(e: FormEvent) {
     e.preventDefault();
     await api.post(`/locations/${location.id}/interface-contacts`, {
       type,
       name: name || null,
-      email: email || null,
       phone: phone || null,
+      email: email || null,
     });
     setName("");
-    setEmail("");
     setPhone("");
+    setEmail("");
     onChanged();
   }
 
@@ -247,7 +247,7 @@ function InterfaceContactsManager({ location, onChanged }: { location: Location;
       <ul>
         {location.interfaceContacts.map((c: LocationInterfaceContact) => (
           <li key={c.id}>
-            <strong>{c.type}</strong>: {c.name ?? "-"} {c.email && `(${c.email})`} {c.phone && `· ${c.phone}`}{" "}
+            <strong>{c.type}</strong>: {c.name ?? "-"} {c.phone && `· ${c.phone}`} {c.email && `(${c.email})`}{" "}
             <button className="btn secondary" onClick={() => remove(c.id)}>
               Remove
             </button>
@@ -257,8 +257,8 @@ function InterfaceContactsManager({ location, onChanged }: { location: Location;
       <form onSubmit={add} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
         <input placeholder="Type (IT/Payroll/KEOS/AMS/...)" value={type} onChange={(e) => setType(e.target.value)} style={{ width: 190 }} required />
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <button className="btn" type="submit">
           Add
         </button>

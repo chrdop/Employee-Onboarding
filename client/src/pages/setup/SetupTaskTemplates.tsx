@@ -19,6 +19,11 @@ export function SetupTaskTemplates() {
     reload();
   }
 
+  async function moveTemplate(templateId: string, direction: "up" | "down") {
+    await api.patch("/task-templates/reorder", { templateId, direction });
+    reload();
+  }
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -33,16 +38,32 @@ export function SetupTaskTemplates() {
       </p>
       {showAdd && <TemplateForm onSaved={() => { setShowAdd(false); reload(); }} />}
 
-      {templates.map((t) => (
+      {templates.map((t, i) => (
         <div key={t.id} className="card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <strong>{t.title}</strong>{" "}
               <span className="muted">
-                (due in {t.defaultDueDays ?? "-"} days, remind {t.defaultReminderDays ?? "-"} days before)
+                (due {t.defaultDueDays ?? "-"} days before entry, remind {t.defaultReminderDays ?? "-"} days before)
               </span>
             </div>
             <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                className="btn secondary"
+                disabled={i === 0}
+                onClick={() => moveTemplate(t.id, "up")}
+                style={{ padding: "0.45rem 0.6rem" }}
+              >
+                &uarr;
+              </button>
+              <button
+                className="btn secondary"
+                disabled={i === templates.length - 1}
+                onClick={() => moveTemplate(t.id, "down")}
+                style={{ padding: "0.45rem 0.6rem" }}
+              >
+                &darr;
+              </button>
               <button className="btn secondary" onClick={() => setExpandedId(expandedId === t.id ? null : t.id)}>
                 {expandedId === t.id ? "Collapse" : "Manage"}
               </button>
@@ -95,7 +116,7 @@ function TemplateForm({ initial, onSaved }: { initial?: TaskTemplate; onSaved: (
           <input value={title} onChange={(e) => setTitle(e.target.value)} required />
         </div>
         <div className="form-field">
-          <label>Default due (days after start)</label>
+          <label>Default due (days before entry)</label>
           <input type="number" value={defaultDueDays} onChange={(e) => setDefaultDueDays(e.target.value)} />
         </div>
         <div className="form-field">
@@ -212,15 +233,25 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
         />
       </div>
 
-      <form onSubmit={addLink} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+      <form onSubmit={addLink} autoComplete="off" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
         <input placeholder="Link title" value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} required />
         <input placeholder="https://..." value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} required style={{ minWidth: 220 }} />
-        <input placeholder="Username (optional)" value={linkUsername} onChange={(e) => setLinkUsername(e.target.value)} />
+        {/* autoComplete values below stop browsers from offering/autofilling the
+            operator's own saved login into these per-resource credential fields. */}
         <input
-          placeholder="Password (optional)"
+          placeholder="Username for this resource (optional)"
+          value={linkUsername}
+          onChange={(e) => setLinkUsername(e.target.value)}
+          autoComplete="off"
+          name="resource-username"
+        />
+        <input
+          placeholder="Password for this resource (optional)"
           type="password"
           value={linkPassword}
           onChange={(e) => setLinkPassword(e.target.value)}
+          autoComplete="new-password"
+          name="resource-password"
         />
         <button className="btn" type="submit">
           Add link

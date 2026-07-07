@@ -94,8 +94,10 @@ router.post("/", async (req, res) => {
       employeeId: employee.id,
       templateId: t.id,
       position: i,
+      // Onboarding paperwork must be done before the employee starts:
+      // "due in N days" means N days before the entry date, not after.
       dueDate: t.defaultDueDays
-        ? new Date(parsed.data.startDate.getTime() + t.defaultDueDays * 24 * 60 * 60 * 1000)
+        ? new Date(parsed.data.startDate.getTime() - t.defaultDueDays * 24 * 60 * 60 * 1000)
         : null,
       reminderIntervalDays: t.defaultReminderDays,
     })),
@@ -106,41 +108,6 @@ router.post("/", async (req, res) => {
     include: { tasks: { include: { template: true } } },
   });
   res.status(201).json(full);
-});
-
-const reorderSchema = z.object({
-  taskId: z.string().min(1),
-  direction: z.enum(["up", "down"]),
-});
-
-router.patch("/:employeeId/tasks/reorder", async (req, res) => {
-  const employee = await prisma.employee.findUnique({ where: { id: req.params.employeeId } });
-  if (!employee) return res.status(404).json({ error: "Employee not found" });
-  if (!canAccessLocation(req.user!, employee.locationId)) {
-    return res.status(403).json({ error: "Insufficient permissions" });
-  }
-  const parsed = reorderSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
-
-  const tasks = await prisma.task.findMany({
-    where: { employeeId: req.params.employeeId },
-    orderBy: { position: "asc" },
-  });
-  const index = tasks.findIndex((t) => t.id === parsed.data.taskId);
-  if (index === -1) return res.status(404).json({ error: "Task not found for this employee" });
-  const swapIndex = parsed.data.direction === "up" ? index - 1 : index + 1;
-  if (swapIndex < 0 || swapIndex >= tasks.length) {
-    return res.status(400).json({ error: "Task is already at the boundary" });
-  }
-
-  const a = tasks[index];
-  const b = tasks[swapIndex];
-  await prisma.$transaction([
-    prisma.task.update({ where: { id: a.id }, data: { position: b.position } }),
-    prisma.task.update({ where: { id: b.id }, data: { position: a.position } }),
-  ]);
-
-  res.json({ ok: true });
 });
 
 const updateSchema = createSchema.partial();
@@ -154,6 +121,28 @@ router.patch("/:id", async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
   const updated = await prisma.employee.update({ where: { id: req.params.id }, data: parsed.data });
+
+  // Entry date drives every task's due date (N days before entry), so
+  // moving it must re-derive all of this employee's due dates.
+  if (parsed.data.startDate && parsed.data.startDate.getTime() !== employee.startDate.getTime()) {
+    const tasks = await prisma.task.findMany({
+      where: { employeeId: req.params.id },
+      include: { template: true },
+    });
+    await prisma.$transaction(
+      tasks.map((t) =>
+        prisma.task.update({
+          where: { id: t.id },
+          data: {
+            dueDate: t.template.defaultDueDays
+              ? new Date(parsed.data.startDate!.getTime() - t.template.defaultDueDays * 24 * 60 * 60 * 1000)
+              : null,
+          },
+        })
+      )
+    );
+  }
+
   res.json(updated);
 });
 
