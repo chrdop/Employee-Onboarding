@@ -32,17 +32,26 @@ export function LocationOverview() {
   return (
     <div>
       <h1>Locations</h1>
-      <div className="tabs">
+      <div className="location-tiles">
         {locations.map((loc) => (
           <button
             key={loc.id}
-            className={loc.id === activeLocationId ? "active" : ""}
+            className={`location-tile${loc.id === activeLocationId ? " active" : ""}`}
             onClick={() => setActiveLocationId(loc.id)}
           >
-            {loc.hotelName}
+            <span className="location-tile-code">{loc.shortCode}</span>
+            <span className="location-tile-name">{loc.hotelName}</span>
+            {loc.roomCount != null && <span className="location-tile-rooms">{loc.roomCount} rooms</span>}
           </button>
         ))}
       </div>
+      <p className="muted" style={{ marginTop: "-0.5rem" }}>
+        Besuche{" "}
+        <a href="https://www.leonardo-hotels.com" target="_blank" rel="noreferrer">
+          leonardo-hotels.com
+        </a>{" "}
+        für weitere Details.
+      </p>
 
       {activeLocation && (
         <div className="card" style={{ marginBottom: "1rem" }}>
@@ -73,7 +82,7 @@ export function LocationOverview() {
           <tr>
             <th>Name</th>
             <th>Position</th>
-            <th>Start date</th>
+            <th>Entry date</th>
             <th>Overall status</th>
             <th>Tasks</th>
           </tr>
@@ -144,7 +153,7 @@ function AddEmployeeForm({ locationId, onCreated }: { locationId: string; onCrea
           <input id="position" value={position} onChange={(e) => setPosition(e.target.value)} />
         </div>
         <div className="form-field">
-          <label htmlFor="startDate">Start date</label>
+          <label htmlFor="startDate">Entry date</label>
           <input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
         </div>
         <div className="form-field">

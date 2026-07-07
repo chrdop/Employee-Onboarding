@@ -1,14 +1,13 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { api, ApiError } from "../api/client";
-import { FeedbackState, Task, TaskStatus } from "../types";
+import { FeedbackState, Task, TaskResource, TaskStatus } from "../types";
 import { StatusPill } from "../components/StatusPill";
 
 export function TaskDetail() {
   const { id } = useParams<{ id: string }>();
   const [task, setTask] = useState<Task | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   function reload() {
     if (id) api.get<Task>(`/tasks/${id}`).then(setTask);
@@ -35,9 +34,6 @@ export function TaskDetail() {
 
   return (
     <div>
-      <button className="btn secondary" onClick={() => navigate(-1)} style={{ marginBottom: "1rem" }}>
-        &larr; Back
-      </button>
       <h1>{task.template.title}</h1>
       {task.template.descriptionWhatHow && <p>{task.template.descriptionWhatHow}</p>}
 
@@ -83,12 +79,7 @@ export function TaskDetail() {
           <h3 style={{ marginTop: 0 }}>Resources</h3>
           <ul>
             {task.template.resources.map((r) => (
-              <li key={r.id}>
-                <a href={r.type === "document" ? `/uploads/${r.urlOrFilePath}` : r.urlOrFilePath} target="_blank" rel="noreferrer">
-                  {r.title}
-                </a>{" "}
-                <span className="muted">({r.type})</span>
-              </li>
+              <ResourceRow key={r.id} taskId={task.id} resource={r} />
             ))}
           </ul>
         </div>
@@ -109,6 +100,51 @@ export function TaskDetail() {
         </ul>
       </div>
     </div>
+  );
+}
+
+function ResourceRow({ taskId, resource }: { taskId: string; resource: TaskResource }) {
+  const [revealed, setRevealed] = useState<{ username: string | null; password: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function reveal() {
+    setError(null);
+    try {
+      const result = await api.post<{ username: string | null; password: string }>(
+        `/tasks/${taskId}/resources/${resource.id}/reveal-password`
+      );
+      setRevealed(result);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not load credentials");
+    }
+  }
+
+  return (
+    <li>
+      <a
+        href={resource.type === "document" ? `/uploads/${resource.urlOrFilePath}` : resource.urlOrFilePath}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {resource.title}
+      </a>{" "}
+      <span className="muted">({resource.type})</span>
+      {resource.hasCredentials && (
+        <>
+          {" "}
+          {!revealed ? (
+            <button className="btn secondary" onClick={reveal}>
+              Show credentials
+            </button>
+          ) : (
+            <span className="muted">
+              &middot; {revealed.username ?? "(no username)"} / <code>{revealed.password}</code>
+            </span>
+          )}
+        </>
+      )}
+      {error && <div className="error-text">{error}</div>}
+    </li>
   );
 }
 

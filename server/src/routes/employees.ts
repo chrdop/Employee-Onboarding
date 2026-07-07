@@ -58,7 +58,7 @@ router.get("/:id", async (req, res) => {
       location: true,
       tasks: {
         include: { template: true, feedback: true, assignedToUser: { select: { id: true, name: true } } },
-        orderBy: { createdAt: "asc" },
+        orderBy: { position: "asc" },
       },
     },
   });
@@ -88,11 +88,12 @@ router.post("/", async (req, res) => {
   const employee = await prisma.employee.create({ data: parsed.data });
 
   // Every employee gets the full global task catalog from day one.
-  const templates = await prisma.taskTemplate.findMany({ where: { isActive: true } });
+  const templates = await prisma.taskTemplate.findMany({ where: { isActive: true }, orderBy: { position: "asc" } });
   await prisma.task.createMany({
-    data: templates.map((t) => ({
+    data: templates.map((t, i) => ({
       employeeId: employee.id,
       templateId: t.id,
+      position: i,
       dueDate: t.defaultDueDays
         ? new Date(parsed.data.startDate.getTime() + t.defaultDueDays * 24 * 60 * 60 * 1000)
         : null,
@@ -105,6 +106,41 @@ router.post("/", async (req, res) => {
     include: { tasks: { include: { template: true } } },
   });
   res.status(201).json(full);
+});
+
+const reorderSchema = z.object({
+  taskId: z.string().min(1),
+  direction: z.enum(["up", "down"]),
+});
+
+router.patch("/:employeeId/tasks/reorder", async (req, res) => {
+  const employee = await prisma.employee.findUnique({ where: { id: req.params.employeeId } });
+  if (!employee) return res.status(404).json({ error: "Employee not found" });
+  if (!canAccessLocation(req.user!, employee.locationId)) {
+    return res.status(403).json({ error: "Insufficient permissions" });
+  }
+  const parsed = reorderSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+
+  const tasks = await prisma.task.findMany({
+    where: { employeeId: req.params.employeeId },
+    orderBy: { position: "asc" },
+  });
+  const index = tasks.findIndex((t) => t.id === parsed.data.taskId);
+  if (index === -1) return res.status(404).json({ error: "Task not found for this employee" });
+  const swapIndex = parsed.data.direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= tasks.length) {
+    return res.status(400).json({ error: "Task is already at the boundary" });
+  }
+
+  const a = tasks[index];
+  const b = tasks[swapIndex];
+  await prisma.$transaction([
+    prisma.task.update({ where: { id: a.id }, data: { position: b.position } }),
+    prisma.task.update({ where: { id: b.id }, data: { position: a.position } }),
+  ]);
+
+  res.json({ ok: true });
 });
 
 const updateSchema = createSchema.partial();

@@ -56,7 +56,7 @@ export function DailyReport() {
       <h1>Daily Report</h1>
       <p className="muted">Generated at {new Date(report.generatedAt).toLocaleString()}</p>
 
-      <h2>Block A — Tasks</h2>
+      <h2>Today's Task</h2>
       {locationEntries.length === 0 && <p className="muted">No open tasks due in the next 7 days.</p>}
       {locationEntries.map(([locId, group]) => (
         <div key={locId} className="card">
@@ -68,7 +68,7 @@ export function DailyReport() {
         </div>
       ))}
 
-      <h2>Block B — Feedback</h2>
+      <h2>Feedback</h2>
       {feedbackEntries.length === 0 && <p className="muted">No open feedback requests.</p>}
       {feedbackEntries.map(([locId, group]) => (
         <div key={locId} className="card">

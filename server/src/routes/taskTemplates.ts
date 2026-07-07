@@ -2,8 +2,16 @@ import { Router } from "express";
 import multer from "multer";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { encryptSecret } from "../lib/crypto";
 import { HR_ROLES, requireAuth, requireRole } from "../middleware/auth";
 import { storage } from "../services/storage";
+
+// Never send encrypted password blobs to the client, even to HR (only the
+// dedicated reveal endpoint decrypts on demand). Replace with a boolean.
+function sanitizeResource<T extends { passwordEncrypted?: string | null }>(resource: T) {
+  const { passwordEncrypted, ...rest } = resource;
+  return { ...rest, hasCredentials: !!passwordEncrypted };
+}
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
@@ -17,7 +25,7 @@ router.get("/", async (_req, res) => {
     include: { resources: true },
     orderBy: { position: "asc" },
   });
-  res.json(templates);
+  res.json(templates.map((t) => ({ ...t, resources: t.resources.map(sanitizeResource) })));
 });
 
 // --- Setup-only mutations below ---
@@ -54,6 +62,10 @@ router.delete("/:id", async (req, res) => {
 const linkResourceSchema = z.object({
   title: z.string().min(1),
   url: z.string().url(),
+  // Optional login for the system behind the link (e.g. KEOS/AMS/PeopleDoc),
+  // so a deputy can complete the task without asking IT for access.
+  username: z.string().min(1).nullable().optional(),
+  password: z.string().min(1).nullable().optional(),
 });
 
 router.post("/:id/resources/link", async (req, res) => {
@@ -65,10 +77,12 @@ router.post("/:id/resources/link", async (req, res) => {
       type: "link",
       title: parsed.data.title,
       urlOrFilePath: parsed.data.url,
+      username: parsed.data.username ?? null,
+      passwordEncrypted: parsed.data.password ? encryptSecret(parsed.data.password) : null,
       uploadedById: req.user!.userId,
     },
   });
-  res.status(201).json(resource);
+  res.status(201).json(sanitizeResource(resource));
 });
 
 router.post("/:id/resources/document", upload.single("file"), async (req, res) => {

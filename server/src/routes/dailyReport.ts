@@ -88,7 +88,9 @@ router.get("/", async (req, res) => {
         employeeName: t.employee.name,
         hotelName: t.employee.location.hotelName,
         dueDate: t.dueDate,
-      })),
+      }))
+      // Grouped by location (alphabetical), then by due date within each location.
+      .sort((a, b) => a.hotelName.localeCompare(b.hotelName) || a.dueDate!.getTime() - b.dueDate!.getTime()),
   });
 });
 

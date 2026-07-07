@@ -120,6 +120,8 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
   const [dragOver, setDragOver] = useState(false);
   const [linkTitle, setLinkTitle] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [linkUsername, setLinkUsername] = useState("");
+  const [linkPassword, setLinkPassword] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function uploadFile(file: File) {
@@ -139,9 +141,16 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
 
   async function addLink(e: FormEvent) {
     e.preventDefault();
-    await api.post(`/task-templates/${template.id}/resources/link`, { title: linkTitle, url: linkUrl });
+    await api.post(`/task-templates/${template.id}/resources/link`, {
+      title: linkTitle,
+      url: linkUrl,
+      username: linkUsername || null,
+      password: linkPassword || null,
+    });
     setLinkTitle("");
     setLinkUrl("");
+    setLinkUsername("");
+    setLinkPassword("");
     onChanged();
   }
 
@@ -171,6 +180,7 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
               </a>
             )}{" "}
             <span className="muted">({r.type})</span>{" "}
+            {r.hasCredentials && <span className="muted">&middot; credentials stored{r.username ? ` (${r.username})` : ""}</span>}{" "}
             <button className="btn secondary" onClick={() => removeResource(r.id)}>
               Remove
             </button>
@@ -205,10 +215,21 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
       <form onSubmit={addLink} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
         <input placeholder="Link title" value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} required />
         <input placeholder="https://..." value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} required style={{ minWidth: 220 }} />
+        <input placeholder="Username (optional)" value={linkUsername} onChange={(e) => setLinkUsername(e.target.value)} />
+        <input
+          placeholder="Password (optional)"
+          type="password"
+          value={linkPassword}
+          onChange={(e) => setLinkPassword(e.target.value)}
+        />
         <button className="btn" type="submit">
           Add link
         </button>
       </form>
+      <p className="muted" style={{ marginTop: "0.4rem" }}>
+        Username/password are stored encrypted and only ever shown to authenticated users via the task detail page's
+        "Show credentials" button (each reveal is logged in the task's activity log).
+      </p>
     </div>
   );
 }

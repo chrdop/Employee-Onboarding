@@ -74,6 +74,7 @@ model LocationContact {
   role       String // e.g. "GM", "OM"
   name       String
   email      String?
+  phone      String?
   note       String? @db.Text
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
@@ -176,6 +177,12 @@ model TaskResource {
   type           ResourceType
   title          String
   urlOrFilePath  String       @map("url_or_file_path")
+  // Only relevant for type=link: optional login for a system behind the link
+  // (e.g. KEOS/AMS/PeopleDoc), so a deputy can complete the task unassisted.
+  // Password is AES-256-GCM encrypted at rest (see lib/crypto.ts), never
+  // stored or returned in plaintext.
+  username          String?      @map("username")
+  passwordEncrypted String?      @map("password_encrypted") @db.Text
   uploadedById   String?      @map("uploaded_by")
   uploadedBy     User?        @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   uploadedAt     DateTime     @default(now()) @map("uploaded_at")
@@ -201,6 +208,7 @@ model Task {
 
   assignedToUserId   String?    @map("assigned_to_user_id")
   assignedToUser     User?      @relation("AssignedTasks", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  position           Int        @default(0)
   status             TaskStatus @default(open)
   notRequiredReason  String?    @map("not_required_reason") @db.Text
   dueDate            DateTime?  @map("due_date")

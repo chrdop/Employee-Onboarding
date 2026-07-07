@@ -18,6 +18,7 @@ export interface LocationContact {
   role: string;
   name: string;
   email: string | null;
+  phone: string | null;
   note: string | null;
 }
 
@@ -56,6 +57,8 @@ export interface TaskResource {
   title: string;
   urlOrFilePath: string;
   uploadedAt: string;
+  username: string | null;
+  hasCredentials: boolean;
 }
 
 export interface TaskTemplate {

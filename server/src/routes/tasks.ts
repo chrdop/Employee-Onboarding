@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { z } from "zod";
 import { TaskStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { decryptSecret } from "../lib/crypto";
 import { canAccessLocation, requireAuth } from "../middleware/auth";
 
 const router = Router();
@@ -13,6 +14,13 @@ async function loadTaskWithEmployee(taskId: string) {
     where: { id: taskId },
     include: { employee: true },
   });
+}
+
+// Never send encrypted password blobs to the client; the reveal endpoint
+// below decrypts on demand and audit-logs the access.
+function sanitizeResource<T extends { passwordEncrypted?: string | null }>(resource: T) {
+  const { passwordEncrypted, ...rest } = resource;
+  return { ...rest, hasCredentials: !!passwordEncrypted };
 }
 
 router.get("/:id", async (req, res) => {
@@ -30,7 +38,33 @@ router.get("/:id", async (req, res) => {
   if (!canAccessLocation(req.user!, task.employee.locationId)) {
     return res.status(403).json({ error: "Insufficient permissions" });
   }
-  res.json(task);
+  res.json({
+    ...task,
+    template: { ...task.template, resources: task.template.resources.map(sanitizeResource) },
+  });
+});
+
+router.post("/:taskId/resources/:resourceId/reveal-password", async (req, res) => {
+  const existing = await loadTaskWithEmployee(req.params.taskId);
+  if (!existing) return res.status(404).json({ error: "Task not found" });
+  if (!canAccessLocation(req.user!, existing.employee.locationId)) {
+    return res.status(403).json({ error: "Insufficient permissions" });
+  }
+  const resource = await prisma.taskResource.findUnique({ where: { id: req.params.resourceId } });
+  if (!resource || resource.taskTemplateId !== existing.templateId || !resource.passwordEncrypted) {
+    return res.status(404).json({ error: "No credentials stored for this resource" });
+  }
+
+  const password = decryptSecret(resource.passwordEncrypted);
+  await prisma.taskEvent.create({
+    data: {
+      taskId: existing.id,
+      eventType: "credential_revealed",
+      text: `Credentials for resource "${resource.title}" were revealed`,
+      userId: req.user!.userId,
+    },
+  });
+  res.json({ username: resource.username, password });
 });
 
 const updateSchema = z.object({

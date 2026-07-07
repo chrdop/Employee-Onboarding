@@ -163,13 +163,21 @@ function LocationDetails({ location, onChanged }: { location: Location; onChange
 function ContactsManager({ location, onChanged }: { location: Location; onChanged: () => void }) {
   const [role, setRole] = useState("GM");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
 
   async function add(e: FormEvent) {
     e.preventDefault();
-    await api.post(`/locations/${location.id}/contacts`, { role, name, email: email || null, note: note || null });
+    await api.post(`/locations/${location.id}/contacts`, {
+      role,
+      name,
+      phone: phone || null,
+      email: email || null,
+      note: note || null,
+    });
     setName("");
+    setPhone("");
     setEmail("");
     setNote("");
     onChanged();
@@ -186,7 +194,8 @@ function ContactsManager({ location, onChanged }: { location: Location; onChange
       <ul>
         {location.contacts.map((c: LocationContact) => (
           <li key={c.id}>
-            <strong>{c.role}</strong>: {c.name} {c.email && `(${c.email})`} {c.note && <em> — {c.note}</em>}{" "}
+            <strong>{c.role}</strong>: {c.name} {c.phone && `· ${c.phone}`} {c.email && `(${c.email})`}{" "}
+            {c.note && <em> — {c.note}</em>}{" "}
             <button className="btn secondary" onClick={() => remove(c.id)}>
               Remove
             </button>
@@ -196,6 +205,7 @@ function ContactsManager({ location, onChanged }: { location: Location; onChange
       <form onSubmit={add} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
         <input placeholder="Role (GM/OM)" value={role} onChange={(e) => setRole(e.target.value)} style={{ width: 90 }} />
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input placeholder="Note" value={note} onChange={(e) => setNote(e.target.value)} />
         <button className="btn" type="submit">

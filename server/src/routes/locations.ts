@@ -81,6 +81,7 @@ const contactSchema = z.object({
   role: z.string().min(1),
   name: z.string().min(1),
   email: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
 });
 
