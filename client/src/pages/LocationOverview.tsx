@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api/client";
+import { OverallStatusPill } from "../components/StatusPill";
 import { EmployeeSummary, Location } from "../types";
 
 export function LocationOverview() {
@@ -95,7 +96,9 @@ export function LocationOverview() {
               <td>{emp.name}</td>
               <td>{emp.position ?? "-"}</td>
               <td>{new Date(emp.startDate).toLocaleDateString()}</td>
-              <td>{emp.overallStatus.replace("_", " ")}</td>
+              <td>
+                <OverallStatusPill status={emp.overallStatus} />
+              </td>
               <td>
                 {emp.taskCounts.done}/{emp.taskCounts.total} done
                 {emp.taskCounts.notRequired > 0 ? `, ${emp.taskCounts.notRequired} n/a` : ""}

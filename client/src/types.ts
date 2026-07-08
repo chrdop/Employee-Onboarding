@@ -116,7 +116,7 @@ export interface EmployeeSummary {
   position: string | null;
   startDate: string;
   peopledocReference: string | null;
-  overallStatus: "not_started" | "in_progress" | "completed";
+  overallStatus: "not_started" | "in_progress" | "completed" | "overdue";
   taskCounts: { total: number; open: number; inProgress: number; done: number; notRequired: number };
 }
 

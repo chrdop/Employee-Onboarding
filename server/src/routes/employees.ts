@@ -6,11 +6,17 @@ import { canAccessLocation, HR_ROLES, requireAuth } from "../middleware/auth";
 const router = Router();
 router.use(requireAuth);
 
-function computeOverallStatus(tasks: { status: string }[]): "not_started" | "in_progress" | "completed" {
+function computeOverallStatus(
+  tasks: { status: string; dueDate: Date | null }[]
+): "not_started" | "in_progress" | "completed" | "overdue" {
   if (tasks.length === 0) return "not_started";
   const relevant = tasks.filter((t) => t.status !== "not_required");
   const allDone = relevant.length === 0 || relevant.every((t) => t.status === "done");
   if (allDone) return "completed";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const hasOverdue = relevant.some((t) => t.status !== "done" && t.dueDate && t.dueDate < today);
+  if (hasOverdue) return "overdue";
   const anyStarted = tasks.some((t) => t.status === "done" || t.status === "in_progress");
   return anyStarted ? "in_progress" : "not_started";
 }
@@ -25,7 +31,10 @@ router.get("/", async (req, res) => {
 
   const employees = await prisma.employee.findMany({
     where,
-    include: { tasks: { select: { status: true } }, location: { select: { id: true, hotelName: true, shortCode: true } } },
+    include: {
+      tasks: { select: { status: true, dueDate: true } },
+      location: { select: { id: true, hotelName: true, shortCode: true } },
+    },
     orderBy: { startDate: "desc" },
   });
 
