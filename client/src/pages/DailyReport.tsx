@@ -5,6 +5,7 @@ import { api } from "../api/client";
 interface TaskRow {
   taskId: string;
   title: string;
+  employeeId: string;
   employeeName: string;
   dueDate: string | null;
   status?: string;
@@ -22,13 +23,21 @@ interface DailyReportResponse {
   generatedAt: string;
   blockA_tasks: Record<string, { hotelName: string; overdue: TaskRow[]; dueToday: TaskRow[]; upcoming: TaskRow[] }>;
   blockB_feedback: Record<string, { hotelName: string; items: FeedbackRow[] }>;
-  forecast7Days: Array<TaskRow & { employeeId: string; hotelName: string; shortCode: string }>;
+  forecast7Days: Array<TaskRow & { hotelName: string; shortCode: string }>;
 }
 
+// Fixed column widths (via colgroup + table-layout: fixed) so every report
+// table lines up the same way, instead of each table auto-sizing its columns
+// independently based on its own content.
 function TaskRowTable({ rows }: { rows: TaskRow[] }) {
   if (rows.length === 0) return <p className="muted">None.</p>;
   return (
-    <table>
+    <table className="report-table">
+      <colgroup>
+        <col style={{ width: "45%" }} />
+        <col style={{ width: "30%" }} />
+        <col style={{ width: "25%" }} />
+      </colgroup>
       <thead>
         <tr>
           <th>Task</th>
@@ -42,7 +51,9 @@ function TaskRowTable({ rows }: { rows: TaskRow[] }) {
             <td>
               <Link to={`/tasks/${r.taskId}`}>{r.title}</Link>
             </td>
-            <td>{r.employeeName}</td>
+            <td>
+              <Link to={`/employees/${r.employeeId}`}>{r.employeeName}</Link>
+            </td>
             <td>{r.dueDate ? new Date(r.dueDate).toLocaleDateString() : "-"}</td>
           </tr>
         ))}
@@ -100,7 +111,13 @@ export function DailyReport() {
       <h2>7-day forecast</h2>
       {report.forecast7Days.length === 0 && <p className="muted">Nothing due in the next 7 days.</p>}
       {report.forecast7Days.length > 0 && (
-        <table className="card">
+        <table className="card report-table">
+          <colgroup>
+            <col style={{ width: "15%" }} />
+            <col style={{ width: "30%" }} />
+            <col style={{ width: "30%" }} />
+            <col style={{ width: "25%" }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Location</th>

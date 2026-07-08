@@ -138,6 +138,16 @@ table {
   font-size: 0.88rem;
 }
 
+.report-table {
+  table-layout: fixed;
+}
+
+.report-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 th,
 td {
   text-align: left;

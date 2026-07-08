@@ -57,6 +57,7 @@ router.get("/", async (req, res) => {
     groupedTasks[locId][bucket].push({
       taskId: task.id,
       title: task.template.title,
+      employeeId: task.employeeId,
       employeeName: task.employee.name,
       dueDate: task.dueDate,
       status: task.status,

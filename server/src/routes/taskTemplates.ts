@@ -93,7 +93,12 @@ router.delete("/:id", async (req, res) => {
 
 const linkResourceSchema = z.object({
   title: z.string().min(1),
-  url: z.string().url(),
+  // Users naturally type bare domains ("www.ams.at") without a scheme;
+  // assume https instead of rejecting the whole submission.
+  url: z.preprocess(
+    (val) => (typeof val === "string" && !/^https?:\/\//i.test(val) ? `https://${val}` : val),
+    z.string().url()
+  ),
   // Optional login for the system behind the link (e.g. KEOS/AMS/PeopleDoc),
   // so a deputy can complete the task without asking IT for access.
   username: z.string().min(1).nullable().optional(),
