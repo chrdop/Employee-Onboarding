@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
   const locations = await prisma.location.findMany({
     where: isHr ? {} : { id: req.user!.locationId ?? "__none__" },
     include: { contacts: true, interfaceContacts: true },
-    orderBy: { hotelName: "asc" },
+    orderBy: { shortCode: "asc" },
   });
   res.json(locations);
 });
