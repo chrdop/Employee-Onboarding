@@ -80,6 +80,7 @@ export function LocationOverview() {
       <table className="card">
         <thead>
           <tr>
+            <th>#</th>
             <th>Name</th>
             <th>Position</th>
             <th>Entry date</th>
@@ -90,6 +91,7 @@ export function LocationOverview() {
         <tbody>
           {employees.map((emp) => (
             <tr key={emp.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/employees/${emp.id}`)}>
+              <td>{emp.employeeNumber ?? "-"}</td>
               <td>{emp.name}</td>
               <td>{emp.position ?? "-"}</td>
               <td>{new Date(emp.startDate).toLocaleDateString()}</td>
@@ -102,7 +104,7 @@ export function LocationOverview() {
           ))}
           {employees.length === 0 && (
             <tr>
-              <td colSpan={5} className="muted">
+              <td colSpan={6} className="muted">
                 No employees at this location yet.
               </td>
             </tr>
