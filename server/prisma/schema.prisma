@@ -55,6 +55,10 @@ model Location {
   legalEntity        String?  @map("legal_entity")
   vatId              String?  @map("vat_id")
   taxNumber          String?  @map("tax_number")
+  // Next value to assign as an employee's per-location sequential number.
+  // Settable on rollout so real-world numbering (from before this tool was
+  // used) can continue from where it left off, instead of always at 1.
+  nextEmployeeNumber Int      @default(1) @map("next_employee_number")
   isActive           Boolean  @default(true) @map("is_active")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")

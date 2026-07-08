@@ -117,7 +117,6 @@ function AddEmployeeForm({ locationId, onCreated }: { locationId: string; onCrea
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [employeeNumber, setEmployeeNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -131,7 +130,6 @@ function AddEmployeeForm({ locationId, onCreated }: { locationId: string; onCrea
         name,
         position: position || null,
         startDate,
-        employeeNumber: employeeNumber || null,
       });
       onCreated(employee);
     } catch (err) {
@@ -156,11 +154,10 @@ function AddEmployeeForm({ locationId, onCreated }: { locationId: string; onCrea
           <label htmlFor="startDate">Entry date</label>
           <input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
         </div>
-        <div className="form-field">
-          <label htmlFor="employeeNumber">Employee number</label>
-          <input id="employeeNumber" value={employeeNumber} onChange={(e) => setEmployeeNumber(e.target.value)} />
-        </div>
       </div>
+      <p className="muted" style={{ marginTop: "0.5rem" }}>
+        The employee number is assigned automatically (next free number for this location).
+      </p>
       {error && <div className="error-text" style={{ marginTop: "0.75rem" }}>{error}</div>}
       <button className="btn" type="submit" disabled={submitting} style={{ marginTop: "0.85rem" }}>
         {submitting ? "Creating..." : "Create employee & checklist"}

@@ -75,7 +75,6 @@ function EditEmployeeForm({ employee, onSaved }: { employee: EmployeeDetailType;
   const [name, setName] = useState(employee.name);
   const [position, setPosition] = useState(employee.position ?? "");
   const [startDate, setStartDate] = useState(employee.startDate.slice(0, 10));
-  const [employeeNumber, setEmployeeNumber] = useState(employee.employeeNumber ?? "");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -88,7 +87,6 @@ function EditEmployeeForm({ employee, onSaved }: { employee: EmployeeDetailType;
         name,
         position: position || null,
         startDate,
-        employeeNumber: employeeNumber || null,
       });
       onSaved();
     } catch (err) {
@@ -119,12 +117,9 @@ function EditEmployeeForm({ employee, onSaved }: { employee: EmployeeDetailType;
             required
           />
         </div>
-        <div className="form-field">
-          <label htmlFor="edit-employeeNumber">Employee number</label>
-          <input id="edit-employeeNumber" value={employeeNumber} onChange={(e) => setEmployeeNumber(e.target.value)} />
-        </div>
       </div>
       <p className="muted" style={{ marginTop: "0.5rem" }}>
+        Employee number #{employee.employeeNumber ?? "-"} is assigned automatically and can't be changed here.
         Changing the entry date recalculates every task's due date (still N days before entry).
       </p>
       {error && <div className="error-text" style={{ marginTop: "0.5rem" }}>{error}</div>}

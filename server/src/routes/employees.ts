@@ -71,7 +71,6 @@ router.get("/:id", async (req, res) => {
 
 const createSchema = z.object({
   locationId: z.string().min(1),
-  employeeNumber: z.string().nullable().optional(),
   name: z.string().min(1),
   position: z.string().nullable().optional(),
   startDate: z.coerce.date(),
@@ -85,7 +84,16 @@ router.post("/", async (req, res) => {
     return res.status(403).json({ error: "Insufficient permissions" });
   }
 
-  const employee = await prisma.employee.create({ data: parsed.data });
+  // Assigned atomically in a single UPDATE so two concurrent creations at
+  // the same location can never receive the same number.
+  const [{ assigned }] = await prisma.$queryRaw<{ assigned: number }[]>`
+    UPDATE locations SET next_employee_number = next_employee_number + 1
+    WHERE id = ${parsed.data.locationId}
+    RETURNING next_employee_number - 1 AS assigned
+  `;
+  const employeeNumber = String(assigned).padStart(3, "0");
+
+  const employee = await prisma.employee.create({ data: { ...parsed.data, employeeNumber } });
 
   // Every employee gets the full global task catalog from day one.
   const templates = await prisma.taskTemplate.findMany({ where: { isActive: true }, orderBy: { position: "asc" } });

@@ -84,6 +84,7 @@ function LocationForm({
     vatId: initial?.vatId ?? "",
     taxNumber: initial?.taxNumber ?? "",
     billingAddressBlock: initial?.billingAddressBlock ?? "",
+    nextEmployeeNumber: initial?.nextEmployeeNumber?.toString() ?? "1",
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +92,11 @@ function LocationForm({
     e.preventDefault();
     setError(null);
     try {
-      const payload = { ...form, roomCount: form.roomCount ? Number(form.roomCount) : null };
+      const payload = {
+        ...form,
+        roomCount: form.roomCount ? Number(form.roomCount) : null,
+        nextEmployeeNumber: form.nextEmployeeNumber ? Number(form.nextEmployeeNumber) : undefined,
+      };
       if (initial) {
         await api.patch(`/locations/${initial.id}`, payload);
       } else {
@@ -127,7 +132,12 @@ function LocationForm({
         {field("legalEntity", "Legal entity")}
         {field("vatId", "VAT ID")}
         {field("taxNumber", "Tax number")}
+        {field("nextEmployeeNumber", "Next employee number")}
       </div>
+      <p className="muted" style={{ marginTop: "0.5rem" }}>
+        Sets the starting point for this location's auto-assigned employee numbers — use this before go-live to
+        continue from an existing numbering scheme instead of starting at 1.
+      </p>
       <div className="form-field" style={{ marginTop: "0.85rem" }}>
         <label>Billing address block</label>
         <textarea

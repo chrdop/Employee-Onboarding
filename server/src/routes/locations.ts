@@ -45,6 +45,7 @@ const locationSchema = z.object({
   legalEntity: z.string().nullable().optional(),
   vatId: z.string().nullable().optional(),
   taxNumber: z.string().nullable().optional(),
+  nextEmployeeNumber: z.number().int().min(1).optional(),
 });
 
 router.post("/", async (req, res) => {

@@ -45,6 +45,7 @@ export interface Location {
   legalEntity: string | null;
   vatId: string | null;
   taxNumber: string | null;
+  nextEmployeeNumber: number;
   isActive: boolean;
   contacts: LocationContact[];
   interfaceContacts: LocationInterfaceContact[];
