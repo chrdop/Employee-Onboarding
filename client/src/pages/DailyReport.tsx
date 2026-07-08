@@ -22,20 +22,32 @@ interface DailyReportResponse {
   generatedAt: string;
   blockA_tasks: Record<string, { hotelName: string; overdue: TaskRow[]; dueToday: TaskRow[]; upcoming: TaskRow[] }>;
   blockB_feedback: Record<string, { hotelName: string; items: FeedbackRow[] }>;
-  forecast7Days: Array<TaskRow & { hotelName: string; shortCode: string }>;
+  forecast7Days: Array<TaskRow & { employeeId: string; hotelName: string; shortCode: string }>;
 }
 
-function TaskRowList({ rows }: { rows: TaskRow[] }) {
+function TaskRowTable({ rows }: { rows: TaskRow[] }) {
   if (rows.length === 0) return <p className="muted">None.</p>;
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      {rows.map((r) => (
-        <li key={r.taskId} style={{ marginBottom: "0.3rem" }}>
-          <Link to={`/tasks/${r.taskId}`}>{r.title}</Link> — {r.employeeName}
-          {r.dueDate ? ` (due ${new Date(r.dueDate).toLocaleDateString()})` : ""}
-        </li>
-      ))}
-    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Employee</th>
+          <th>Due</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.taskId}>
+            <td>
+              <Link to={`/tasks/${r.taskId}`}>{r.title}</Link>
+            </td>
+            <td>{r.employeeName}</td>
+            <td>{r.dueDate ? new Date(r.dueDate).toLocaleDateString() : "-"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -62,9 +74,9 @@ export function DailyReport() {
         <div key={locId} className="card">
           <h3 style={{ marginTop: 0 }}>{group.hotelName}</h3>
           <strong>Overdue</strong>
-          <TaskRowList rows={group.overdue} />
-          <strong>Due today</strong>
-          <TaskRowList rows={group.dueToday} />
+          <TaskRowTable rows={group.overdue} />
+          <strong style={{ marginTop: "0.75rem", display: "block" }}>Due today</strong>
+          <TaskRowTable rows={group.dueToday} />
         </div>
       ))}
 
@@ -101,7 +113,9 @@ export function DailyReport() {
             {report.forecast7Days.map((r) => (
               <tr key={r.taskId}>
                 <td>{r.shortCode}</td>
-                <td>{r.employeeName}</td>
+                <td>
+                  <Link to={`/employees/${r.employeeId}`}>{r.employeeName}</Link>
+                </td>
                 <td>
                   <Link to={`/tasks/${r.taskId}`}>{r.title}</Link>
                 </td>

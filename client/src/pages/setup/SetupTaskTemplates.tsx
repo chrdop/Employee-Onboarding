@@ -153,14 +153,20 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
   const [linkUrl, setLinkUrl] = useState("");
   const [linkUsername, setLinkUsername] = useState("");
   const [linkPassword, setLinkPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function uploadFile(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", file.name);
-    await api.post(`/task-templates/${template.id}/resources/document`, formData);
-    onChanged();
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", file.name);
+      await api.post(`/task-templates/${template.id}/resources/document`, formData);
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not upload document");
+    }
   }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
@@ -172,22 +178,32 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
 
   async function addLink(e: FormEvent) {
     e.preventDefault();
-    await api.post(`/task-templates/${template.id}/resources/link`, {
-      title: linkTitle,
-      url: linkUrl,
-      username: linkUsername || null,
-      password: linkPassword || null,
-    });
-    setLinkTitle("");
-    setLinkUrl("");
-    setLinkUsername("");
-    setLinkPassword("");
-    onChanged();
+    setError(null);
+    try {
+      await api.post(`/task-templates/${template.id}/resources/link`, {
+        title: linkTitle,
+        url: linkUrl,
+        username: linkUsername || null,
+        password: linkPassword || null,
+      });
+      setLinkTitle("");
+      setLinkUrl("");
+      setLinkUsername("");
+      setLinkPassword("");
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not add link");
+    }
   }
 
   async function removeResource(resourceId: string) {
-    await api.delete(`/task-templates/${template.id}/resources/${resourceId}`);
-    onChanged();
+    setError(null);
+    try {
+      await api.delete(`/task-templates/${template.id}/resources/${resourceId}`);
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not remove resource");
+    }
   }
 
   return (
@@ -198,6 +214,7 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
       {editing && <TemplateForm initial={template} onSaved={() => { setEditing(false); onChanged(); }} />}
 
       <h4>Resources</h4>
+      {error && <div className="error-text" style={{ marginBottom: "0.5rem" }}>{error}</div>}
       <ul>
         {template.resources.map((r) => (
           <li key={r.id}>

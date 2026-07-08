@@ -85,6 +85,7 @@ router.get("/", async (req, res) => {
       .map((t) => ({
         taskId: t.id,
         title: t.template.title,
+        employeeId: t.employeeId,
         employeeName: t.employee.name,
         hotelName: t.employee.location.hotelName,
         shortCode: t.employee.location.shortCode,
