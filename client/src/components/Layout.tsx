@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { MiniCalendar } from "./MiniCalendar";
 import { NotificationBell } from "./NotificationBell";
@@ -6,7 +6,6 @@ import { NotificationBell } from "./NotificationBell";
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const isHr = user?.role === "hr_central" || user?.role === "hr_deputy";
   const isLocationRole = user?.role === "location_manager" || user?.role === "location_deputy";
 
@@ -34,13 +33,9 @@ export function Layout() {
       </nav>
       <main className="app-main">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          {location.pathname === "/" ? (
-            <span />
-          ) : (
-            <button className="btn secondary" onClick={() => navigate("/")}>
-              &larr; Back to Locations
-            </button>
-          )}
+          <button className="btn secondary" onClick={() => navigate(-1)}>
+            &larr; Back
+          </button>
           <NotificationBell />
         </div>
         <Outlet />
