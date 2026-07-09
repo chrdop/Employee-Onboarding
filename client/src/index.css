@@ -231,6 +231,28 @@ th {
   opacity: 0.75;
 }
 
+/* Keeps the location tiles + active-location summary + "Employees" header
+   pinned while a long employee list scrolls independently underneath. */
+.location-overview-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-bg);
+  padding-bottom: 0.75rem;
+}
+
+.employee-table-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.employee-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  z-index: 1;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;

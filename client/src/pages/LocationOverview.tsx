@@ -32,40 +32,42 @@ export function LocationOverview() {
 
   return (
     <div>
-      <h1>Locations</h1>
-      <div className="location-tiles">
-        {locations.map((loc) => (
-          <button
-            key={loc.id}
-            className={`location-tile${loc.id === activeLocationId ? " active" : ""}`}
-            onClick={() => setActiveLocationId(loc.id)}
-          >
-            <span className="location-tile-code">{loc.shortCode}</span>
-            <span className="location-tile-name">{loc.hotelName}</span>
-            {loc.roomCount != null && <span className="location-tile-rooms">{loc.roomCount} rooms</span>}
-          </button>
-        ))}
-      </div>
-      <p className="muted" style={{ marginTop: "-0.5rem" }}>
-        Besuche{" "}
-        <a href="https://www.leonardo-hotels.com" target="_blank" rel="noreferrer">
-          leonardo-hotels.com
-        </a>{" "}
-        für weitere Details.
-      </p>
-
-      {activeLocation && (
-        <div className="card" style={{ marginBottom: "1rem" }}>
-          <strong>{activeLocation.hotelName}</strong> ({activeLocation.shortCode}) &middot; {activeLocation.address},{" "}
-          {activeLocation.plzOrt} &middot; {activeLocation.roomCount ?? "?"} rooms
+      <div className="location-overview-sticky-header">
+        <h1>Locations</h1>
+        <div className="location-tiles">
+          {locations.map((loc) => (
+            <button
+              key={loc.id}
+              className={`location-tile${loc.id === activeLocationId ? " active" : ""}`}
+              onClick={() => setActiveLocationId(loc.id)}
+            >
+              <span className="location-tile-code">{loc.shortCode}</span>
+              <span className="location-tile-name">{loc.hotelName}</span>
+              {loc.roomCount != null && <span className="location-tile-rooms">{loc.roomCount} rooms</span>}
+            </button>
+          ))}
         </div>
-      )}
+        <p className="muted" style={{ marginTop: "-0.5rem" }}>
+          Besuche{" "}
+          <a href="https://www.leonardo-hotels.com" target="_blank" rel="noreferrer">
+            leonardo-hotels.com
+          </a>{" "}
+          für weitere Details.
+        </p>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-        <h3 style={{ margin: 0 }}>Employees</h3>
-        <button className="btn" onClick={() => setShowAddForm((v) => !v)}>
-          {showAddForm ? "Cancel" : "+ Add employee"}
-        </button>
+        {activeLocation && (
+          <div className="card" style={{ marginBottom: "1rem" }}>
+            <strong>{activeLocation.hotelName}</strong> ({activeLocation.shortCode}) &middot; {activeLocation.address},{" "}
+            {activeLocation.plzOrt} &middot; {activeLocation.roomCount ?? "?"} rooms
+          </div>
+        )}
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0 }}>Employees</h3>
+          <button className="btn" onClick={() => setShowAddForm((v) => !v)}>
+            {showAddForm ? "Cancel" : "+ Add employee"}
+          </button>
+        </div>
       </div>
 
       {showAddForm && activeLocationId && (
@@ -78,42 +80,44 @@ export function LocationOverview() {
         />
       )}
 
-      <table className="card">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Entry date</th>
-            <th>Overall status</th>
-            <th>Tasks</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((emp) => (
-            <tr key={emp.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/employees/${emp.id}`)}>
-              <td>{emp.employeeNumber ?? "-"}</td>
-              <td>{emp.name}</td>
-              <td>{emp.position ?? "-"}</td>
-              <td>{new Date(emp.startDate).toLocaleDateString()}</td>
-              <td>
-                <OverallStatusPill status={emp.overallStatus} />
-              </td>
-              <td>
-                {emp.taskCounts.done}/{emp.taskCounts.total} done
-                {emp.taskCounts.notRequired > 0 ? `, ${emp.taskCounts.notRequired} n/a` : ""}
-              </td>
-            </tr>
-          ))}
-          {employees.length === 0 && (
+      <div className="employee-table-scroll">
+        <table className="card">
+          <thead>
             <tr>
-              <td colSpan={6} className="muted">
-                No employees at this location yet.
-              </td>
+              <th>#</th>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Entry date</th>
+              <th>Overall status</th>
+              <th>Tasks</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {employees.map((emp) => (
+              <tr key={emp.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/employees/${emp.id}`)}>
+                <td>{emp.employeeNumber ?? "-"}</td>
+                <td>{emp.name}</td>
+                <td>{emp.position ?? "-"}</td>
+                <td>{new Date(emp.startDate).toLocaleDateString()}</td>
+                <td>
+                  <OverallStatusPill status={emp.overallStatus} />
+                </td>
+                <td>
+                  {emp.taskCounts.done}/{emp.taskCounts.total} done
+                  {emp.taskCounts.notRequired > 0 ? `, ${emp.taskCounts.notRequired} n/a` : ""}
+                </td>
+              </tr>
+            ))}
+            {employees.length === 0 && (
+              <tr>
+                <td colSpan={6} className="muted">
+                  No employees at this location yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
