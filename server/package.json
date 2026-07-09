@@ -12,6 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:reset-admin-password": "tsx prisma/reset-admin-password.ts",
+    "prisma:reset-demo-employees": "tsx prisma/reset-demo-employees.ts",
     "prisma:generate": "prisma generate"
   },
   "prisma": {
