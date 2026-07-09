@@ -50,6 +50,7 @@ export function EmployeeDetail() {
           <tr>
             <th>Task</th>
             <th>Status</th>
+            <th>Reason</th>
             <th>Due date</th>
             <th>Feedback</th>
           </tr>
@@ -61,6 +62,7 @@ export function EmployeeDetail() {
               <td>
                 <StatusPill status={task.status} />
               </td>
+              <td>{task.notRequiredReason ?? "-"}</td>
               <td>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "-"}</td>
               <td>{task.feedback ? task.feedback.status : "-"}</td>
             </tr>
