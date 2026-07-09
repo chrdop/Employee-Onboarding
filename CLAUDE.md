@@ -11,6 +11,17 @@ with role-scoped access, a daily report, in-app reminders, and a no-login
 magic-link flow for external interfaces (IT/Payroll/KEOS/AMS) to confirm
 their part without an account.
 
+## Project status
+
+As of 2026-07-09, the project owner considers **Ausbaustufe 1 (MVP)
+feature-complete** — no more ad-hoc items pending. The result is now being
+tested "praxisnah" (hands-on) with the actual HR-responsible person in the
+Replit dev environment before any further work starts. **Don't proactively
+propose or start Ausbaustufe 2 features** (see README's "Deliberately not
+included yet") until the user explicitly says the HR test round is done and
+gives the go-ahead. Until then, expect only bug-fix/polish requests, most
+likely delivered as another `Bugs/*.odt` batch (see below).
+
 ## Commands
 
 npm workspaces monorepo (`server`, `client`). Run from repo root unless noted.
