@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import fs from "fs";
 import path from "path";
 import { env } from "./lib/env";
 import { scheduleReminderJob } from "./jobs/reminderJob";
@@ -37,6 +38,25 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/public", publicRoutes);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+// Serve the built client (client/dist) so one process delivers UI and API when
+// deployed. Candidates cover running from source (tsx, server/src) and from the
+// compiled output (server/dist/src); in dev the Vite server is used instead and
+// no build is needed.
+const clientDist = [
+  path.resolve(__dirname, "../../client/dist"),
+  path.resolve(__dirname, "../../../client/dist"),
+].find((dir) => fs.existsSync(path.join(dir, "index.html")));
+
+if (clientDist) {
+  app.use(express.static(clientDist));
+  // SPA fallback: any other GET (not API/uploads/assets) gets index.html so deep links work.
+  app.get(/^\/(?!api\/|uploads\/|assets\/).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+} else {
+  console.warn("No client build found (client/dist). Only the API is served; run `npm run build` first.");
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
