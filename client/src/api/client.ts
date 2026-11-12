@@ -8,15 +8,39 @@ export class ApiError extends Error {
   }
 }
 
+const NETWORK_MESSAGE = "Could not reach the server. Check your connection and try again.";
+const SERVER_MESSAGE = "The server ran into a problem. Please try again. If it keeps happening, contact the administrator.";
+
+// Backend validation errors arrive as a JSON string of zod issues; turn them
+// into "field: message" text instead of showing raw JSON.
+function readableMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((i) => i && typeof i.message === "string")) {
+      return parsed
+        .map((i) => `${Array.isArray(i.path) && i.path.length > 0 ? `${i.path.join(".")}: ` : ""}${i.message}`)
+        .join("; ");
+    }
+  } catch {
+    // not JSON — use the text as is
+  }
+  return raw;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    credentials: "include",
-    headers:
-      options.body instanceof FormData
-        ? options.headers
-        : { "Content-Type": "application/json", ...options.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      credentials: "include",
+      headers:
+        options.body instanceof FormData
+          ? options.headers
+          : { "Content-Type": "application/json", ...options.headers },
+    });
+  } catch {
+    throw new ApiError(0, NETWORK_MESSAGE);
+  }
 
   if (!res.ok) {
     let message = res.statusText;
@@ -26,7 +50,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     } catch {
       // ignore non-JSON error bodies
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, res.status >= 500 ? SERVER_MESSAGE : readableMessage(message));
   }
   if (res.status === 204) return undefined as T;
   return res.json();

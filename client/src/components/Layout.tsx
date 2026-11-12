@@ -1,4 +1,6 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ApiError } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { MiniCalendar } from "./MiniCalendar";
 import { NotificationBell } from "./NotificationBell";
@@ -6,6 +8,30 @@ import { NotificationBell } from "./NotificationBell";
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [apiProblem, setApiProblem] = useState<{ status: number; message: string } | null>(null);
+
+  // Any API call a page didn't handle itself (loads, saves, moves, ...) ends up
+  // here, so a failure is always visible instead of silently doing nothing.
+  useEffect(() => {
+    function onUnhandledRejection(event: PromiseRejectionEvent) {
+      if (event.reason instanceof ApiError) {
+        event.preventDefault();
+        setApiProblem({
+          status: event.reason.status,
+          message:
+            event.reason.status === 401
+              ? "Your session has expired. Please log in again."
+              : event.reason.message,
+        });
+      }
+    }
+    window.addEventListener("unhandledrejection", onUnhandledRejection);
+    return () => window.removeEventListener("unhandledrejection", onUnhandledRejection);
+  }, []);
+
+  useEffect(() => setApiProblem(null), [pathname]);
+
   const isHr = user?.role === "hr_central" || user?.role === "hr_deputy";
   const isLocationRole = user?.role === "location_manager" || user?.role === "location_deputy";
 
@@ -40,6 +66,21 @@ export function Layout() {
           </button>
           <NotificationBell />
         </div>
+        {apiProblem && (
+          <div className="error-banner" role="alert">
+            <span>{apiProblem.message}</span>
+            <span style={{ display: "flex", gap: "0.5rem" }}>
+              {apiProblem.status === 401 || apiProblem.status === 0 ? (
+                <button className="btn secondary" onClick={() => window.location.reload()}>
+                  Reload page
+                </button>
+              ) : null}
+              <button className="btn secondary" onClick={() => setApiProblem(null)}>
+                Dismiss
+              </button>
+            </span>
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

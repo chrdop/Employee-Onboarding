@@ -48,11 +48,11 @@ export function LocationOverview() {
           ))}
         </div>
         <p className="muted" style={{ marginTop: "-0.5rem" }}>
-          Besuche{" "}
+          Visit{" "}
           <a href="https://www.leonardo-hotels.com" target="_blank" rel="noreferrer">
             leonardo-hotels.com
           </a>{" "}
-          für weitere Details.
+          for more details.
         </p>
 
         {activeLocation && (

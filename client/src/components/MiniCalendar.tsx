@@ -12,7 +12,7 @@ function buildMonthGrid(year: number, month: number): (number | null)[] {
 
 function MonthGrid({ year, month, today }: { year: number; month: number; today: Date }) {
   const cells = buildMonthGrid(year, month);
-  const label = new Date(year, month, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const label = new Date(year, month, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
   return (

@@ -15,7 +15,7 @@ function required(name: string): string {
 // silently running with a known key.
 for (const name of ["JWT_SECRET", "CREDENTIAL_ENCRYPTION_KEY"]) {
   if (!process.env[name]) {
-    console.warn(`WARNUNG: ${name} ist nicht gesetzt, es wird ein öffentlich bekannter Entwicklungswert verwendet. In Replit unter Secrets setzen.`);
+    console.warn(`WARNING: ${name} is not set, falling back to a publicly known development value. Set it in Replit Secrets.`);
   }
 }
 

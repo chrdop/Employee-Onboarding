@@ -155,7 +155,7 @@ type SeedContact = { role: string; name: string; email: string | null; note: str
 function loadContactsFile(): Record<string, SeedContact[]> {
   const file = path.join(__dirname, "seed-contacts.local.json");
   if (!fs.existsSync(file)) {
-    console.warn("WARNUNG: seed-contacts.local.json nicht gefunden. Standorte ohne Kontakte erhalten einen Platzhalter-Kontakt.");
+    console.warn("WARNING: seed-contacts.local.json not found. Locations without contacts get a placeholder contact.");
     return {};
   }
   return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -173,7 +173,7 @@ async function main() {
     });
     let contacts: SeedContact[] = contactsByLocation[locationData.shortCode] ?? [];
     if (contacts.length === 0 && (await prisma.locationContact.count({ where: { locationId: created.id } })) === 0) {
-      contacts = [{ role: "GM", name: "Max Mustermann (Platzhalter)", email: "gm@example.com", note: null }];
+      contacts = [{ role: "GM", name: "Placeholder Contact", email: "gm@example.com", note: null }];
     }
     for (const contact of contacts) {
       const existing = await prisma.locationContact.findFirst({

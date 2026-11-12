@@ -22,6 +22,21 @@ included yet") until the user explicitly says the HR test round is done and
 gives the go-ahead. Until then, expect only bug-fix/polish requests, most
 likely delivered as another `Bugs/*.odt` batch (see below).
 
+## Language and error handling
+
+The whole app is **consistently English**: UI texts, error messages, server
+logs/warnings, scripts. Decided by the project owner (2026-11-12); this
+deliberately overrides the "error messages in German" rule of the
+hotel-app-standards skill. Not translated, on purpose: real master data
+(hotel names, addresses, task titles like "Angebot"). Calendar month names are
+fixed to `en-GB`.
+
+Errors must never fail silently. `client/src/api/client.ts` turns failures into
+readable English (zod issues as `field: message`, 5xx and network errors as
+plain sentences). Any `ApiError` a page doesn't catch itself is caught
+globally in `Layout.tsx` (`unhandledrejection`) and shown as a red banner —
+so don't add empty `.catch(() => {})` handlers that swallow errors.
+
 ## Version
 
 Schema MAJOR.MINOR.PATCH, **single source: `version` in the root

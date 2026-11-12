@@ -13,7 +13,11 @@
 - Echte Kontakte stehen weiter in der Git-Historie. Bereinigen nur nach Rückfrage (würde Historie umschreiben).
 - Noch nicht umgesetzt aus dem Skill-Bericht: Versionsnummer (eine Quelle, Header `vX.Y.Z`, Vorschlag 0.2.0), `.catch` mit deutschen Meldungen bei Ladeaufrufen, lesbare Zod-Fehler, CLAUDE.md-Abschnitte Version und Veröffentlichung, README korrigieren (Port 5000).
 
-**Wo weitermachen:** Fehler/Warnungen (Punkt 3), dann Doku (Punkt 4).
+**Wo weitermachen:** Doku (Punkt 4) und Prüfung mit dem Skill hotel-design-gold. Fehler/Warnungen (Punkt 3) sind erledigt, siehe Nachtrag unten.
+
+### Nachtrag 2026-11-12: Englisch durchgängig + Fehlerbehandlung
+- Entscheidung des Projektinhabers: App konsequent auf Englisch (überstimmt die deutsche Fehlertext-Regel des Skills). Letzte deutsche Texte ersetzt: Footer-Satz in Locations, Server- und Seed-Warnungen, Platzhalter-Kontakt, Kalender-Monatsnamen (`en-GB`). Stammdaten (Hotelnamen, Task-Titel) bleiben unverändert.
+- Fehler sind nicht mehr still: lesbare englische Meldungen im API-Client, zentrales rotes Hinweisfeld im Layout für jeden nicht abgefangenen API-Fehler.
 
 ### Nachtrag 2026-11-12: Version 0.2.0
 - Version auf 0.2.0 angehoben, eine Quelle (Root-`package.json`), Anzeige `v0.2.0` in der Sidebar (Commit siehe `git log`).
