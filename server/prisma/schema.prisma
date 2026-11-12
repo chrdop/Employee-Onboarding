@@ -194,6 +194,19 @@ model TaskResource {
   @@map("task_resources")
 }
 
+// Uploaded task-resource documents (form templates). Stored in the database
+// rather than on disk because Replit Autoscale has no persistent filesystem.
+// `id` is the storage key that TaskResource.urlOrFilePath points to.
+model StoredFile {
+  id          String   @id @default(cuid())
+  filename    String
+  contentType String?  @map("content_type")
+  data        Bytes
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("stored_files")
+}
+
 // ---------------------------------------------------------------------------
 // Task instances (per employee)
 // ---------------------------------------------------------------------------

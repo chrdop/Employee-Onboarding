@@ -15,13 +15,15 @@ import notificationsRoutes from "./routes/notifications";
 import dailyReportRoutes from "./routes/dailyReport";
 import settingsRoutes from "./routes/settings";
 import publicRoutes from "./routes/public";
+import uploadsRoutes from "./routes/uploads";
 
 const app = express();
 
 app.use(cors({ origin: env.clientOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.resolve(env.uploadDir)));
+app.use("/uploads", uploadsRoutes);
+app.use("/uploads", express.static(path.resolve(env.uploadDir))); // legacy disk files
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);

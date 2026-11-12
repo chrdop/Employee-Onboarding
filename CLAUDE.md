@@ -43,7 +43,17 @@ npx prisma migrate deploy              # apply existing migrations, non-interact
 npx prisma generate                    # regenerate the Prisma Client — NOT run automatically by migrate deploy
 npm run prisma:seed                    # seed real locations/task catalog + one HR-central admin (password printed once to console)
 npm run prisma:reset-admin-password    # -- <email> <password>  (both args optional; random password if omitted)
+npm run prisma:reset-demo-employees    # DESTRUCTIVE: deletes ALL employees, seeds 5 demo employees at ATSALFRA
 ```
+
+Real GM/OM names and e-mail addresses are not in git: `prisma:seed` reads
+them from `server/prisma/seed-contacts.local.json` (git-ignored, keyed by
+location short code). Without it the seed warns and adds a fake placeholder
+contact only to locations that have none. `JWT_SECRET` and
+`CREDENTIAL_ENCRYPTION_KEY` belong in Replit Secrets, never in `.replit` or
+code; the server warns at startup (names only) if they fall back to the
+public dev defaults. Changing `CREDENTIAL_ENCRYPTION_KEY` later makes
+already-stored resource passwords undecryptable.
 
 There is no test suite/runner configured in either workspace.
 
@@ -130,9 +140,12 @@ per task per day. Recipient is `assignedToUser`, falling back to all
 `location_manager`/`location_deputy` at that location. Email/Teams delivery
 is intentionally out of scope (in-app only).
 
-`server/src/services/storage.ts` is a small adapter around local-disk file
-storage for uploaded task resources — swap in an S3-compatible backend here
-later without touching call sites.
+`server/src/services/storage.ts` is a small adapter for uploaded task-resource
+documents. It stores files in PostgreSQL (`StoredFile`, served by
+`routes/uploads.ts`) because Replit Autoscale has no persistent filesystem —
+don't switch it back to local disk. Files uploaded before that still live in
+`server/uploads/` and are served/deleted via a legacy fallback. A different
+backend (e.g. S3-compatible) only needs another `StorageAdapter`.
 
 ### Frontend
 

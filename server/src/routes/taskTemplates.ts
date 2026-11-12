@@ -125,7 +125,7 @@ router.post("/:id/resources/link", async (req, res) => {
 router.post("/:id/resources/document", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const title = (req.body.title as string) || req.file.originalname;
-  const storedPath = await storage.save(req.file.originalname, req.file.buffer);
+  const storedPath = await storage.save(req.file.originalname, req.file.buffer, req.file.mimetype);
   const resource = await prisma.taskResource.create({
     data: {
       taskTemplateId: req.params.id,
