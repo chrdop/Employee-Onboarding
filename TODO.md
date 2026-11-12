@@ -13,7 +13,11 @@
 - Echte Kontakte stehen weiter in der Git-Historie. Bereinigen nur nach Rückfrage (würde Historie umschreiben).
 - Noch nicht umgesetzt aus dem Skill-Bericht: Versionsnummer (eine Quelle, Header `vX.Y.Z`, Vorschlag 0.2.0), `.catch` mit deutschen Meldungen bei Ladeaufrufen, lesbare Zod-Fehler, CLAUDE.md-Abschnitte Version und Veröffentlichung, README korrigieren (Port 5000).
 
-**Wo weitermachen:** Punkt 2 des Skill-Berichts (Version), dann Fehler/Warnungen, dann Doku.
+**Wo weitermachen:** Fehler/Warnungen (Punkt 3), dann Doku (Punkt 4).
+
+### Nachtrag 2026-11-12: Version 0.2.0
+- Version auf 0.2.0 angehoben, eine Quelle (Root-`package.json`), Anzeige `v0.2.0` in der Sidebar (Commit siehe `git log`).
+- **Offen, wichtig für die Veröffentlichung:** Der Server baut nach `server/dist/src/index.js` (tsconfig `rootDir: "."`), aber `.replit` (Deployment `run`) und `server/package.json` (`start`) rufen `server/dist/index.js` auf. Dieser Pfad existiert nicht, eine veröffentlichte App würde so nicht starten. Vor dem ersten Republish prüfen und korrigieren.
 
 ## 2026-07-09 — done today
 

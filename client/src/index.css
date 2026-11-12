@@ -70,6 +70,14 @@ a {
   margin-bottom: 0.75rem;
 }
 
+.app-nav .app-version {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
 .app-nav a {
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;

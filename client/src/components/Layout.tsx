@@ -15,7 +15,9 @@ export function Layout() {
         <button className="btn danger" style={{ marginBottom: "1rem" }} onClick={() => logout()}>
           Log out
         </button>
-        <div className="brand">Onboarding Tracker</div>
+        <div className="brand">
+          Onboarding Tracker <span className="app-version">v{__APP_VERSION__}</span>
+        </div>
         <NavLink to="/" end>
           Locations
         </NavLink>

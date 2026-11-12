@@ -22,6 +22,19 @@ included yet") until the user explicitly says the HR test round is done and
 gives the go-ahead. Until then, expect only bug-fix/polish requests, most
 likely delivered as another `Bugs/*.odt` batch (see below).
 
+## Version
+
+Schema MAJOR.MINOR.PATCH, **single source: `version` in the root
+`package.json`** (currently 0.2.0). `client/vite.config.ts` reads it at build
+time and injects `__APP_VERSION__`, shown as `vX.Y.Z` under the brand in the
+sidebar (`Layout.tsx`). The `version` fields in `client/package.json` and
+`server/package.json` are not used and not maintained — don't bump or read
+them. Bump once per release, only after the user's go (propose the number with
+a short reason): PATCH = fix, MINOR = new feature, MAJOR = big rework or data
+format change; 1.0.0 = first productive use. Use `npm version <x.y.z>
+--no-git-tag-version` at the repo root. There are no exports (PDF/Excel) yet;
+when one is added it must state "erzeugt mit Onboarding Tracker vX.Y.Z".
+
 ## Commands
 
 npm workspaces monorepo (`server`, `client`). Run from repo root unless noted.
