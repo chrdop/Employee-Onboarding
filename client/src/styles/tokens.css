@@ -1,0 +1,69 @@
+/* ==========================================================
+   Leonardo Hotels internal design tokens (skill hotel-design-leonardo).
+   This is the ONLY place for raw color values — everything else uses these
+   variables. Brand red #B5003B is verified from the Leonardo website; the
+   rest is derived (tints, dark-mode values) until the brand manual says
+   otherwise.
+   ========================================================== */
+
+:root {
+  /* Brand */
+  --lh-red: #B5003B;        /* primary action, active navigation, accents */
+  --lh-red-dark: #8E002E;   /* hover / active */
+  --lh-red-tint: #FBE9EF;   /* highlight surfaces, table heads, badges */
+  --lh-red-text: #B5003B;   /* red used as text / outline (lighter in dark mode for contrast) */
+  --lh-on-red: #FFFFFF;     /* text on red */
+
+  /* Neutrals */
+  --lh-ink: #1A1A1A;
+  --lh-ink-soft: #5A5A5A;
+  --lh-line: #E5E2DE;
+  --lh-bg: #FAF8F6;
+  --lh-surface: #FFFFFF;
+
+  /* Status */
+  --lh-ok: #2E7D32;
+  --lh-warn: #B26A00;
+  --lh-err: #C62828;
+  --lh-ok-tint: #E6F2E7;
+  --lh-warn-tint: #FFF1DB;
+  --lh-err-tint: #FBE4E1;
+  --lh-neutral-tint: #EEECE9;
+  --lh-neutral-ink: #5A5A5A;
+  --lh-neutral-dot: #A3A09B;
+
+  /* Shape, depth, type */
+  --lh-radius: 8px;         /* cards */
+  --lh-radius-btn: 4px;     /* buttons, fields */
+  --lh-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --lh-overlay: rgba(0, 0, 0, 0.4);
+  --lh-font: "Helvetica Neue", Arial, system-ui, sans-serif;
+
+  --header-h: 67px;         /* 64 px bar + 3 px red line */
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lh-bg: #141414;
+    --lh-surface: #1E1E1E;
+    --lh-ink: #F2F2F2;
+    --lh-ink-soft: #B0B0B0;
+    --lh-line: #333333;
+    --lh-red-tint: #3A1420;
+    --lh-red-text: #FF6B93;
+
+    --lh-ok: #66BB6A;
+    --lh-warn: #FFB74D;
+    --lh-err: #EF5350;
+    --lh-ok-tint: #16301A;
+    --lh-warn-tint: #3A2A0C;
+    --lh-err-tint: #3A1420;
+    --lh-neutral-tint: #2A2A2A;
+    --lh-neutral-ink: #B0B0B0;
+    --lh-neutral-dot: #777777;
+
+    --lh-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}

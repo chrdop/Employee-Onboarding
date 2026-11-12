@@ -14,6 +14,7 @@ export function SetupLocations() {
   useEffect(reload, []);
 
   async function deactivate(id: string) {
+    if (!confirm("Deactivate this location? It will be hidden from the active views.")) return;
     const result = await api.post<{ warning: string | null }>(`/locations/${id}/deactivate`);
     if (result.warning) alert(result.warning);
     reload();
@@ -158,7 +159,7 @@ function LocationDetails({ location, onChanged }: { location: Location; onChange
   const [editing, setEditing] = useState(false);
 
   return (
-    <div style={{ marginTop: "1rem", borderTop: "1px solid var(--color-border)", paddingTop: "1rem" }}>
+    <div style={{ marginTop: "1rem", borderTop: "1px solid var(--lh-line)", paddingTop: "1rem" }}>
       <button className="btn secondary" onClick={() => setEditing((v) => !v)} style={{ marginBottom: "0.85rem" }}>
         {editing ? "Cancel edit" : "Edit core data"}
       </button>
@@ -194,6 +195,7 @@ function ContactsManager({ location, onChanged }: { location: Location; onChange
   }
 
   async function remove(contactId: string) {
+    if (!confirm("Remove this contact?")) return;
     await api.delete(`/locations/${location.id}/contacts/${contactId}`);
     onChanged();
   }
@@ -247,6 +249,7 @@ function InterfaceContactsManager({ location, onChanged }: { location: Location;
   }
 
   async function remove(contactId: string) {
+    if (!confirm("Remove this interface contact?")) return;
     await api.delete(`/locations/${location.id}/interface-contacts/${contactId}`);
     onChanged();
   }

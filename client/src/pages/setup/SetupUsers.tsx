@@ -46,7 +46,7 @@ export function SetupUsers() {
       </p>
 
       {lastTempPassword && (
-        <div className="card" style={{ background: "#fff4de" }}>
+        <div className="card notice-warn">
           Temporary password for <strong>{lastTempPassword.email}</strong>: <code>{lastTempPassword.password}</code>{" "}
           (share this securely — it must be changed on first login)
         </div>

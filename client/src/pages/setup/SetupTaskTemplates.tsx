@@ -197,6 +197,7 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
   }
 
   async function removeResource(resourceId: string) {
+    if (!confirm("Remove this resource? Stored credentials for it are deleted as well.")) return;
     setError(null);
     try {
       await api.delete(`/task-templates/${template.id}/resources/${resourceId}`);
@@ -207,7 +208,7 @@ function TemplateDetails({ template, onChanged }: { template: TaskTemplate; onCh
   }
 
   return (
-    <div style={{ marginTop: "1rem", borderTop: "1px solid var(--color-border)", paddingTop: "1rem" }}>
+    <div style={{ marginTop: "1rem", borderTop: "1px solid var(--lh-line)", paddingTop: "1rem" }}>
       <button className="btn secondary" onClick={() => setEditing((v) => !v)} style={{ marginBottom: "0.85rem" }}>
         {editing ? "Cancel edit" : "Edit title / description"}
       </button>

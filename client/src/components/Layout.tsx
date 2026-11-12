@@ -30,36 +30,56 @@ export function Layout() {
     return () => window.removeEventListener("unhandledrejection", onUnhandledRejection);
   }, []);
 
-  useEffect(() => setApiProblem(null), [pathname]);
+  // Close the phone menu and clear any error banner when the page changes.
+  const [navOpen, setNavOpen] = useState(false);
+  useEffect(() => {
+    setApiProblem(null);
+    setNavOpen(false);
+  }, [pathname]);
 
   const isHr = user?.role === "hr_central" || user?.role === "hr_deputy";
   const isLocationRole = user?.role === "location_manager" || user?.role === "location_deputy";
 
   return (
-    <div className="app-shell">
-      <nav className="app-nav">
-        <button className="btn danger" style={{ marginBottom: "1rem" }} onClick={() => logout()}>
-          Log out
-        </button>
-        <div className="brand">
-          Onboarding Tracker <span className="app-version">v{__APP_VERSION__}</span>
+    <>
+      <header className="app-header">
+        <div className="app-header-left">
+          <button
+            type="button"
+            className="btn secondary menu-toggle"
+            aria-expanded={navOpen}
+            aria-controls="app-nav"
+            onClick={() => setNavOpen((open) => !open)}
+          >
+            {navOpen ? "Close" : "Menu"}
+          </button>
+          {/* Text logo until the official logo file is added (never redraw the logo). */}
+          <span className="logo-text">LEONARDO HOTELS</span>
+          <span className="app-title">
+            Onboarding Tracker <span className="app-version">v{__APP_VERSION__}</span>
+          </span>
         </div>
-        <NavLink to="/" end>
-          Locations
-        </NavLink>
-        <NavLink to="/daily-report">Daily Report</NavLink>
-        {isLocationRole && <NavLink to="/my-open-tasks">My Open Tasks</NavLink>}
-        <NavLink to="/notifications">Notifications</NavLink>
-        {isHr && <NavLink to="/setup">Setup</NavLink>}
-        <div style={{ marginTop: "auto", padding: "0.75rem 1.25rem 0" }}>
+        <div className="app-header-right">
+          <span>{user?.name}</span>
+          <span className="user-role">{user?.role}</span>
+        </div>
+      </header>
+      <div className="app-shell">
+        {navOpen && <div className="nav-backdrop" onClick={() => setNavOpen(false)} />}
+        <nav id="app-nav" className={`app-nav${navOpen ? " open" : ""}`}>
+          <button className="btn secondary" onClick={() => logout()}>
+            Log out
+          </button>
+          <NavLink to="/" end>
+            Locations
+          </NavLink>
+          <NavLink to="/daily-report">Daily Report</NavLink>
+          {isLocationRole && <NavLink to="/my-open-tasks">My Open Tasks</NavLink>}
+          <NavLink to="/notifications">Notifications</NavLink>
+          {isHr && <NavLink to="/setup">Setup</NavLink>}
           <MiniCalendar />
-        </div>
-        <div className="nav-footer">
-          <div>{user?.name}</div>
-          <div style={{ opacity: 0.7 }}>{user?.role}</div>
-        </div>
-      </nav>
-      <main className="app-main">
+        </nav>
+        <main className="app-main">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
           <button className="btn secondary" onClick={() => navigate(-1)}>
             &larr; Back
@@ -82,7 +102,8 @@ export function Layout() {
           </div>
         )}
         <Outlet />
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }

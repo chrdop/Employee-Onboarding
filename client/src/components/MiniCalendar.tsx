@@ -16,31 +16,22 @@ function MonthGrid({ year, month, today }: { year: number; month: number; today:
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
   return (
-    <div style={{ marginBottom: "0.85rem" }}>
-      <div style={{ fontSize: "0.72rem", fontWeight: 600, marginBottom: "0.3rem", opacity: 0.85 }}>{label}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px", fontSize: "0.62rem" }}>
+    <div className="mini-calendar-month">
+      <div className="mini-calendar-title">{label}</div>
+      <div className="mini-calendar-grid">
         {WEEKDAY_LABELS.map((w, i) => (
-          <div key={i} style={{ opacity: 0.6, textAlign: "center" }}>
+          <div key={i} className="mini-calendar-weekday">
             {w}
           </div>
         ))}
-        {cells.map((day, i) => {
-          const isToday = isCurrentMonth && day === today.getDate();
-          return (
-            <div
-              key={i}
-              style={{
-                textAlign: "center",
-                padding: "2px 0",
-                borderRadius: "3px",
-                background: isToday ? "var(--color-accent)" : "transparent",
-                fontWeight: isToday ? 700 : 400,
-              }}
-            >
-              {day ?? ""}
-            </div>
-          );
-        })}
+        {cells.map((day, i) => (
+          <div
+            key={i}
+            className={`mini-calendar-day${isCurrentMonth && day === today.getDate() ? " today" : ""}`}
+          >
+            {day ?? ""}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -53,7 +44,7 @@ export function MiniCalendar() {
   const nextMonthDate = new Date(year, month + 1, 1);
 
   return (
-    <div style={{ color: "#fff" }}>
+    <div className="mini-calendar">
       <MonthGrid year={year} month={month} today={today} />
       <MonthGrid year={nextMonthDate.getFullYear()} month={nextMonthDate.getMonth()} today={today} />
     </div>

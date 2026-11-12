@@ -1,5 +1,20 @@
 # TODO / Session log
 
+## 2026-11-12 (später) — Umbau auf das Leonardo-Design
+
+**Erledigt**
+- Design-Skill-Vergleich Gold gegen Leonardo; Entscheidung des Projektinhabers: **Leonardo** (siehe CLAUDE.md, Abschnitt Design).
+- App komplett umgestellt: Tokens in `client/src/styles/tokens.css`, neues `index.css`, weißer Header mit roter Linie und Textlogo, Handy-Menü, Dark Mode, Fokus-Ringe, 44-px-Buttons, Bestätigungsdialoge für zerstörende Aktionen. Keine Farbwerte mehr außerhalb von `tokens.css`. Commit siehe `git log`.
+- Geprüft im Browser: Desktop, 375 px (kein horizontales Scrollen), Dark Mode, Login, Locations, Daily Report, Mitarbeiter, Setup > Task templates.
+
+**Offen**
+- Offizielles Leonardo-Logo (PNG) fehlt im Projekt, bis dahin Textlogo "LEONARDO HOTELS" in Header und Login.
+- Nicht einzeln angesehen: Notifications-Seite und Dropdown der Glocke, Setup > Users/Locations/Settings, Task-Detailseite auf dem Handy. Sie nutzen dieselben Klassen, ein kurzer Blick fehlt aber.
+- Versionsnummer nach dem Umbau? Vorschlag 0.3.0 (MINOR, neue Optik), nur nach Go.
+- Weiter offen aus früher: Server-Startpfad für Veröffentlichung (`dist/index.js` gegen `dist/src/index.js`), Replit-Secrets und Migration, Doku-Abschnitt "Veröffentlichung", README (Port 5000).
+
+**Wo weitermachen:** kurzer Blick auf die nicht geprüften Seiten, dann Version/Startpfad.
+
 ## 2026-11-12 — Prüfung gegen Skill hotel-app-standards, Risiken behoben
 
 **Erledigt**

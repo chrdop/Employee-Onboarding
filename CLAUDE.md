@@ -37,12 +37,38 @@ plain sentences). Any `ApiError` a page doesn't catch itself is caught
 globally in `Layout.tsx` (`unhandledrejection`) and shown as a red banner —
 so don't add empty `.catch(() => {})` handlers that swallow errors.
 
+## Design
+
+The look follows the **Leonardo Hotels design skill (`hotel-design-leonardo`)**,
+chosen by the project owner on 2026-11-12 over the gold/black skill
+(`hotel-design-gold`, which is for the owner's own apps — don't mix them).
+Light brand look (red `#B5003B`, warm grey, white cards) with automatic dark
+mode via `prefers-color-scheme`.
+
+- **All color values live in `client/src/styles/tokens.css`**, nowhere else —
+  `index.css` and the TSX files only use `var(--lh-*)`. No hex/rgb in components.
+  New colors (e.g. another status tint) get a token first.
+- Shell: white 64 px header with a 3 px red line (text logo, app name,
+  version, user), sidebar with nav + mini calendar, drawer menu below 768 px.
+  Phone layout: no page-level horizontal scroll, tap targets 44 px, tables
+  scroll inside their own box.
+- Primary button = red, uppercase, 44 px. Destructive actions (deactivate,
+  delete, remove) must ask via `confirm()` first.
+- **Deliberate deviations from the skill:** the UI stays English with
+  browser-locale dates (the skill says German/TT.MM.JJJJ), and the skill's
+  "standalone single HTML file, no network calls" rule doesn't apply (this is
+  a client/server app).
+- **Logo:** the official Leonardo logo file isn't in the repo, so the header
+  and login page show the neutral text logo "LEONARDO HOTELS" (`Layout.tsx`,
+  `Login.tsx`). Replace it with the official PNG (never redraw or recolor it)
+  once the file is available.
+
 ## Version
 
 Schema MAJOR.MINOR.PATCH, **single source: `version` in the root
 `package.json`** (currently 0.2.0). `client/vite.config.ts` reads it at build
-time and injects `__APP_VERSION__`, shown as `vX.Y.Z` under the brand in the
-sidebar (`Layout.tsx`). The `version` fields in `client/package.json` and
+time and injects `__APP_VERSION__`, shown as `vX.Y.Z` in the header
+(`Layout.tsx`). The `version` fields in `client/package.json` and
 `server/package.json` are not used and not maintained — don't bump or read
 them. Bump once per release, only after the user's go (propose the number with
 a short reason): PATCH = fix, MINOR = new feature, MAJOR = big rework or data

@@ -30,8 +30,8 @@ export function ChangePassword() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-      <form className="card" style={{ width: 360 }} onSubmit={handleSubmit}>
+    <div className="login-wrap">
+      <form className="card login-card" onSubmit={handleSubmit}>
         <h2 style={{ marginTop: 0 }}>Set a new password</h2>
         <p className="muted">This account was created with a temporary password. Please set your own before continuing.</p>
         <div className="form-field" style={{ marginBottom: "0.85rem" }}>

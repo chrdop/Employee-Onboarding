@@ -46,8 +46,8 @@ export function PublicFeedback() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-      <div className="card" style={{ width: 420 }}>
+    <div className="login-wrap">
+      <div className="card login-card" style={{ maxWidth: 420 }}>
         <h2 style={{ marginTop: 0 }}>Onboarding task feedback</h2>
         {notFound && <p className="error-text">This link is invalid or has expired.</p>}
         {info && !submitted && (

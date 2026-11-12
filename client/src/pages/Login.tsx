@@ -28,8 +28,9 @@ export function Login() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-      <form className="card" style={{ width: 340 }} onSubmit={handleSubmit}>
+    <div className="login-wrap">
+      <form className="card login-card" onSubmit={handleSubmit}>
+        <span className="logo-text">LEONARDO HOTELS</span>
         <h2 style={{ marginTop: 0 }}>Onboarding Tracker</h2>
         <div className="form-field" style={{ marginBottom: "0.85rem" }}>
           <label htmlFor="email">Email</label>
