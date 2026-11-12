@@ -11,7 +11,8 @@
 - Offizielles Leonardo-Logo (PNG) fehlt im Projekt, bis dahin Textlogo "LEONARDO HOTELS" in Header und Login.
 - Nicht einzeln angesehen: Notifications-Seite und Dropdown der Glocke, Setup > Users/Locations/Settings, Task-Detailseite auf dem Handy. Sie nutzen dieselben Klassen, ein kurzer Blick fehlt aber.
 - ~~Versionsnummer nach dem Umbau~~ erledigt: auf 0.3.0 angehoben (MINOR, neue Optik), nach Go des Projektinhabers.
-- Weiter offen aus früher: Server-Startpfad für Veröffentlichung (`dist/index.js` gegen `dist/src/index.js`), Replit-Secrets und Migration, Doku-Abschnitt "Veröffentlichung", README (Port 5000).
+- ~~Server-Startpfad~~ erledigt: `.replit` (Deployment `run`) und `server/package.json` (`start`, `main`) zeigen jetzt auf `dist/src/index.js`, Start lokal geprüft. **Neu entdeckt:** der Server liefert den Client-Build (`client/dist`) nicht aus, ein Deployment hätte also keine Oberfläche. Vor dem Veröffentlichen klären.
+- Weiter offen aus früher: Replit-Secrets und Migration, Doku-Abschnitt "Veröffentlichung", README (Port 5000).
 
 **Wo weitermachen:** kurzer Blick auf die nicht geprüften Seiten, dann Version/Startpfad.
 
