@@ -1,5 +1,20 @@
 # TODO / Session log
 
+## 2026-11-12 — Prüfung gegen Skill hotel-app-standards, Risiken behoben
+
+**Erledigt**
+- JWT_SECRET aus der `.replit` entfernt, `Bugs/` in die `.gitignore`, Startwarnung bei Dev-Default-Schlüsseln (`dc10264`).
+- Echte GM/OM-Kontakte aus `seed.ts` in lokale, ignorierte `seed-contacts.local.json` verschoben (`a61d449`).
+- Hochgeladene Task-Dokumente liegen jetzt in der Datenbank statt auf der Platte, wegen Autoscale (`0f947a6`).
+
+**Offen**
+- In Replit: `JWT_SECRET` und `CREDENTIAL_ENCRYPTION_KEY` unter Secrets setzen. Der Schlüssel jetzt, bevor echte Passwörter gespeichert werden.
+- In Replit: `git pull`, `npx prisma migrate deploy`, `npx prisma generate`, voller Neustart (neue Tabelle `stored_files`).
+- Echte Kontakte stehen weiter in der Git-Historie. Bereinigen nur nach Rückfrage (würde Historie umschreiben).
+- Noch nicht umgesetzt aus dem Skill-Bericht: Versionsnummer (eine Quelle, Header `vX.Y.Z`, Vorschlag 0.2.0), `.catch` mit deutschen Meldungen bei Ladeaufrufen, lesbare Zod-Fehler, CLAUDE.md-Abschnitte Version und Veröffentlichung, README korrigieren (Port 5000).
+
+**Wo weitermachen:** Punkt 2 des Skill-Berichts (Version), dann Fehler/Warnungen, dann Doku.
+
 ## 2026-07-09 — done today
 
 - Added `CLAUDE.md` (repo guide for future Claude Code sessions).
