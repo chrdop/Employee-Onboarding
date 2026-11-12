@@ -12,7 +12,7 @@ channel = "stable-25_05"
 PORT = "4000"
 CLIENT_ORIGIN = "http://localhost:5000"
 UPLOAD_DIR = "./uploads"
-JWT_SECRET = "dev-secret-change-me-replit"
+# JWT_SECRET and CREDENTIAL_ENCRYPTION_KEY belong in Replit Secrets, not here.
 
 [workflows]
 runButton = "Project"

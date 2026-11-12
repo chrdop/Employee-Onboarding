@@ -4,6 +4,10 @@ build/
 .env
 *.log
 server/uploads/
+
+# Feedback documents from the project owner (may contain screenshots with
+# real data) — local only, never commit.
+Bugs/
 .DS_Store
 ~$*.md
 ~$*.xlsx

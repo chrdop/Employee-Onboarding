@@ -10,6 +10,15 @@ function required(name: string): string {
   return value;
 }
 
+// Fallbacks below are public (they're in git) — fine for local dev, never for
+// a deployed instance. Warn loudly (names only, never values) instead of
+// silently running with a known key.
+for (const name of ["JWT_SECRET", "CREDENTIAL_ENCRYPTION_KEY"]) {
+  if (!process.env[name]) {
+    console.warn(`WARNUNG: ${name} ist nicht gesetzt, es wird ein öffentlich bekannter Entwicklungswert verwendet. In Replit unter Secrets setzen.`);
+  }
+}
+
 export const env = {
   port: Number(process.env.PORT ?? 4000),
   databaseUrl: required("DATABASE_URL"),
