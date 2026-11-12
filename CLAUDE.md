@@ -66,7 +66,7 @@ mode via `prefers-color-scheme`.
 ## Version
 
 Schema MAJOR.MINOR.PATCH, **single source: `version` in the root
-`package.json`** (currently 0.2.0). `client/vite.config.ts` reads it at build
+`package.json`** (currently 0.3.0). `client/vite.config.ts` reads it at build
 time and injects `__APP_VERSION__`, shown as `vX.Y.Z` in the header
 (`Layout.tsx`). The `version` fields in `client/package.json` and
 `server/package.json` are not used and not maintained — don't bump or read
