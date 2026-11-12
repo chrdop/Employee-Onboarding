@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const prisma = new PrismaClient();
 
@@ -19,7 +21,6 @@ const locations = [
     legalEntity: "Sunflower Management GmbH & Co. KG",
     vatId: "ATU72416218",
     taxNumber: "37/083/45896",
-    contacts: [{ role: "GM", name: "Elisabeth Binder", email: "e.binder@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "470",
@@ -34,15 +35,6 @@ const locations = [
     legalEntity: "Leonardo Graumanngasse Wien GmbH (FN 475052g)",
     vatId: "ATU72564227",
     taxNumber: "09 297/7230",
-    contacts: [
-      { role: "GM", name: "Elisabeth Binder", email: "e.binder@leonardo-hotels.com", note: null },
-      {
-        role: "OM",
-        name: "Lisa (Ambroz) Scheiflinger",
-        email: "lisa.scheiflinger@leonardo-hotels.com",
-        note: "Mailadresse nach Hochzeit noch nicht umgestellt!",
-      },
-    ],
   },
   {
     mandantNr: "454",
@@ -57,7 +49,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "GM", name: "Christoff Seibert", email: "christoff.seibert@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "455",
@@ -72,7 +63,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "GM", name: "Eva Fitzinger", email: "eva.fitzinger@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "453",
@@ -87,7 +77,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "GM", name: "Sandra Krenmair", email: "sandra.krenmair@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "452",
@@ -102,7 +91,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "OM", name: "Stefanie Matti-Oberweger", email: "stefanie.matti@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "451",
@@ -117,7 +105,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "GM", name: "Christian Doppelhofer", email: "c.doppelhofer@leonardo-hotels.com", note: null }],
   },
   {
     mandantNr: "456",
@@ -132,7 +119,6 @@ const locations = [
     legalEntity: "Leonardo Hotels Austria Opco GmbH",
     vatId: "ATU62458236",
     taxNumber: "07 296/5015",
-    contacts: [{ role: "GM", name: "Andrea Ratzenböck", email: "andrea.ratzenboeck@leonardo-hotels.com", note: null }],
   },
 ];
 
@@ -160,15 +146,35 @@ function randomPassword(length = 14): string {
   return crypto.randomBytes(length).toString("base64url").slice(0, length);
 }
 
+type SeedContact = { role: string; name: string; email: string | null; note: string | null };
+
+// Real GM/OM names and e-mail addresses are personal data and deliberately
+// NOT in git. They live in a local, git-ignored file keyed by location short
+// code. Without it, locations that have no contacts yet get one clearly
+// fake placeholder contact so a fresh dev setup still shows the UI.
+function loadContactsFile(): Record<string, SeedContact[]> {
+  const file = path.join(__dirname, "seed-contacts.local.json");
+  if (!fs.existsSync(file)) {
+    console.warn("WARNUNG: seed-contacts.local.json nicht gefunden. Standorte ohne Kontakte erhalten einen Platzhalter-Kontakt.");
+    return {};
+  }
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
 async function main() {
+  const contactsByLocation = loadContactsFile();
+
   console.log("Seeding locations...");
-  for (const loc of locations) {
-    const { contacts, ...locationData } = loc;
+  for (const locationData of locations) {
     const created = await prisma.location.upsert({
-      where: { shortCode: loc.shortCode },
+      where: { shortCode: locationData.shortCode },
       update: locationData,
       create: locationData,
     });
+    let contacts: SeedContact[] = contactsByLocation[locationData.shortCode] ?? [];
+    if (contacts.length === 0 && (await prisma.locationContact.count({ where: { locationId: created.id } })) === 0) {
+      contacts = [{ role: "GM", name: "Max Mustermann (Platzhalter)", email: "gm@example.com", note: null }];
+    }
     for (const contact of contacts) {
       const existing = await prisma.locationContact.findFirst({
         where: { locationId: created.id, name: contact.name },

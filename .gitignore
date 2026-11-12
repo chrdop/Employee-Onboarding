@@ -8,6 +8,9 @@ server/uploads/
 # Feedback documents from the project owner (may contain screenshots with
 # real data) — local only, never commit.
 Bugs/
+
+# Real GM/OM names and e-mail addresses for the seed (see server/prisma/seed.ts).
+server/prisma/seed-contacts.local.json
 .DS_Store
 ~$*.md
 ~$*.xlsx
